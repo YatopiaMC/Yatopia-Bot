@@ -22,7 +22,7 @@ async def on_message(msg):
     if msg.content.lower().startswith("?"):		
         cmd = msg.content.lower().replace("?", "")
         if cmd == ("jdk15"):
-            await msg.channel.send("JDK 15 is the fastest JDK that works with Yatopia, you can download it here: https://jdk.java.net/15/ . Run `?flags` for flag information.")
+            await msg.channel.send("JDK 15 is the fastest JDK that works with Yatopia, you can download it here: https://jdk.java.net/15/ . Run `?flags` for more information on flags.")
             await msg.channel.send("WARNING: JDK 15 is currently in the a pre-release state meaning it may contain issues, use it at your own risk.")
         elif cmd == ("openj91.16.2"):
             await msg.channel.send("You can't start Minecraft 1.16.2 with OpenJ9 and we do not recommend OpenJ9, use `?flags` for the recommended flags.")
