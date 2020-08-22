@@ -15,7 +15,7 @@ public class CommandUpstream extends Command {
 
   @Override
   public boolean execute(@NotNull CommandExecutionContext context, @NotNull CommandArguments args) {
-    context.getChannel().sendMessage("https://mrivanplays.com/upstream.gif").queue();
+    context.getChannel().sendMessage("https://yatopia.net/upstream.gif").queue();
     return true;
   }
 }

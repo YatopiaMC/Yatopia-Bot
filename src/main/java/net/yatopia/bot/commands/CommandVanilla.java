@@ -15,7 +15,7 @@ public class CommandVanilla extends Command {
 
   @Override
   public boolean execute(@NotNull CommandExecutionContext context, @NotNull CommandArguments args) {
-    context.getChannel().sendMessage("https://mrivanplays.com/vanilla.mp4").queue();
+    context.getChannel().sendMessage("https://yatopia.net/vanilla.mp4").queue();
     return true;
   }
 }
