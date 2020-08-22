@@ -17,6 +17,10 @@ async def on_ready():
 
 @client.event
 async def on_message(msg):
+    if msg.author.bot:
+        return
+    if "yapfa" in msg.content.lower():
+        await msg.channel.send("We're now Yatopia. Please stop using YAPFA.")
     if msg.content.lower().startswith("?"):
         cmd = msg.content.lower().replace("?", "")
         if cmd == ("jdk15"):
