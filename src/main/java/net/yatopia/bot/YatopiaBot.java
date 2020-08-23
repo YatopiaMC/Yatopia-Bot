@@ -1,6 +1,7 @@
 package net.yatopia.bot;
 
 import com.mrivanplays.jdcf.CommandManager;
+import com.mrivanplays.jdcf.builtin.CommandShutdown;
 import com.mrivanplays.jdcf.settings.CommandSettings;
 import com.mrivanplays.jdcf.settings.prefix.ImmutablePrefixHandler;
 import java.awt.Color;
@@ -20,8 +21,11 @@ import net.yatopia.bot.commands.CommandDownloadSpecific;
 import net.yatopia.bot.commands.CommandJDKSpecific;
 import net.yatopia.bot.commands.CommandUpstream;
 import net.yatopia.bot.commands.CommandVanilla;
+import net.yatopia.bot.commands.CommandYarnSpecific;
 import net.yatopia.bot.commands.CommandYatopiaSpecific;
 import net.yatopia.bot.listeners.MessageListener;
+import net.yatopia.bot.mappings.MappingParser;
+import net.yatopia.bot.mappings.yarn.YarnMappingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +46,9 @@ public class YatopiaBot {
 
   private final String token;
   private final ScheduledExecutorService executor;
+
+  public MappingParser yarnParser;
+  private MappingParser spigotParser; // todo
 
   private YatopiaBot(String token) {
     this.token = token;
@@ -96,13 +103,16 @@ public class YatopiaBot {
 
     CommandManager commandManager = new CommandManager(jda, settings);
     commandManager.setSettings(settings);
+    yarnParser = new YarnMappingHandler();
     commandManager.registerCommands(
         new CommandJDKSpecific(),
         new CommandDownloadSpecific(),
         new CommandYatopiaSpecific(),
         new CommandAsk(),
         new CommandVanilla(),
-        new CommandUpstream());
+        new CommandUpstream(),
+        new CommandYarnSpecific(this),
+        new CommandShutdown("252049584598024192"));
 
     executor.scheduleAtFixedRate(
         new Runnable() {
