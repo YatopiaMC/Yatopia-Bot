@@ -19,6 +19,7 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.yatopia.bot.commands.CommandAsk;
 import net.yatopia.bot.commands.CommandDownloadSpecific;
 import net.yatopia.bot.commands.CommandJDKSpecific;
+import net.yatopia.bot.commands.CommandPing;
 import net.yatopia.bot.commands.CommandUpstream;
 import net.yatopia.bot.commands.CommandVanilla;
 import net.yatopia.bot.commands.CommandYarnSpecific;
@@ -112,6 +113,7 @@ public class YatopiaBot {
         new CommandVanilla(),
         new CommandUpstream(),
         new CommandYarnSpecific(this),
+        new CommandPing(),
         new CommandShutdown("252049584598024192"));
 
     executor.scheduleAtFixedRate(

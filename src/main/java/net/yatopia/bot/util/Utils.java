@@ -1,10 +1,13 @@
 package net.yatopia.bot.util;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public final class Utils {
+
+  public static final ObjectMapper JSON_MAPPER = new ObjectMapper();
 
   public static <T> List<List<T>> getPages(Collection<T> c, int pageSize) {
     List<T> list = new ArrayList<>(c);
