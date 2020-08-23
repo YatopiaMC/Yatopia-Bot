@@ -1,6 +1,5 @@
 package net.yatopia.bot.mappings.yarn;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.io.BufferedReader;
@@ -14,7 +13,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -25,11 +23,10 @@ import net.yatopia.bot.mappings.MappingType;
 import net.yatopia.bot.mappings.NameType;
 import net.yatopia.bot.mappings.NoSuchVersionException;
 import net.yatopia.bot.util.TriPredicate;
+import net.yatopia.bot.util.Utils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
-
-import static net.yatopia.bot.util.Utils.JSON_MAPPER;
 
 public final class YarnMappingHandler implements MappingParser {
 
@@ -38,18 +35,14 @@ public final class YarnMappingHandler implements MappingParser {
     V2
   }
 
-  private static final TriPredicate<NameType, Mapping, String> EXACT =
-      (type, mapping, input) -> type.get(mapping).equalsIgnoreCase(input);
-  private static final TriPredicate<NameType, Mapping, String> ENDS_WITH =
-      (type, mapping, input) -> type.get(mapping).endsWith(input);
-
   private Cache<String, List<Mapping>> mappingCache =
       Caffeine.newBuilder().expireAfterWrite(Duration.ofHours(4)).build();
-  private Map<String, MappingVersion> currentVersions = new ConcurrentHashMap<>();
+  private Map<String, YarnMappingVersion> currentVersions = new ConcurrentHashMap<>();
 
-  private long lastDownloadTime = -1;
+  private Map<String, Long> lastDownloadTimes = new ConcurrentHashMap<>();
 
   private void downloadIfNeeded(File dataFolder, String mcVersion) throws NoSuchVersionException {
+    long lastDownloadTime = lastDownloadTimes.getOrDefault(mcVersion, -1L);
     if (lastDownloadTime != -1
         && (lastDownloadTime + TimeUnit.HOURS.toMillis(4)) > System.currentTimeMillis()) {
       return;
@@ -60,13 +53,14 @@ public final class YarnMappingHandler implements MappingParser {
       File version = new File(mappingsFolder, ".dataversion");
       if (version.exists()) {
         try (BufferedReader reader = new BufferedReader(new FileReader(version))) {
-          currentVersions.put(mcVersion, JSON_MAPPER.readValue(reader, MappingVersion.class));
+          currentVersions.put(
+              mcVersion, Utils.JSON_MAPPER.readValue(reader, YarnMappingVersion.class));
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
       }
     }
-    MappingVersion version;
+    YarnMappingVersion version;
     try {
       URL versionsUrl =
           new URL("https://meta.fabricmc.net/v1/versions/mappings/" + mcVersion + "/");
@@ -74,7 +68,7 @@ public final class YarnMappingHandler implements MappingParser {
       connection.setRequestMethod("GET");
       connection.addRequestProperty("User-Agent", "Yatopia-Bot");
       try (InputStream in = connection.getInputStream()) {
-        MappingVersion[] versions = JSON_MAPPER.readValue(in, MappingVersion[].class);
+        YarnMappingVersion[] versions = Utils.JSON_MAPPER.readValue(in, YarnMappingVersion[].class);
         if (versions == null || versions.length == 0) {
           throw new NoSuchVersionException(mcVersion);
         }
@@ -83,7 +77,7 @@ public final class YarnMappingHandler implements MappingParser {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    MappingVersion current = currentVersions.get(mcVersion);
+    YarnMappingVersion current = currentVersions.get(mcVersion);
     if (current != null && current.getBuild() == version.getBuild()) {
       if (mappingCache.getIfPresent(mcVersion) == null) {
         TinyType mappingsType = TinyType.V1;
@@ -151,11 +145,12 @@ public final class YarnMappingHandler implements MappingParser {
         versionFile.delete();
       }
       versionFile.createNewFile();
-      FileUtils.write(versionFile, JSON_MAPPER.writeValueAsString(version), StandardCharsets.UTF_8);
+      FileUtils.write(
+          versionFile, Utils.JSON_MAPPER.writeValueAsString(version), StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    lastDownloadTime = System.currentTimeMillis();
+    lastDownloadTimes.put(mcVersion, System.currentTimeMillis());
   }
 
   private boolean isBadCode(int code) {
@@ -165,14 +160,14 @@ public final class YarnMappingHandler implements MappingParser {
   @Override
   public List<Mapping> parseMapping(MappingType type, String mcVer, String input)
       throws NoSuchVersionException {
-    return parseMappings(null, type, mcVer, input, ENDS_WITH);
+    return parseMappings(null, type, mcVer, input, Utils.ENDS_WITH);
   }
 
   @Override
   public List<Mapping> parseMappingExact(
       NameType nameType, MappingType mappingType, String mcVer, String input)
       throws NoSuchVersionException {
-    return parseMappings(nameType, mappingType, mcVer, input, EXACT);
+    return parseMappings(nameType, mappingType, mcVer, input, Utils.EXACT);
   }
 
   private List<Mapping> parseMappings(
@@ -191,26 +186,6 @@ public final class YarnMappingHandler implements MappingParser {
     if (mappings == null) {
       throw new NoSuchVersionException(mcVer);
     }
-    List<Mapping> ret = new ArrayList<>();
-    if (nameType == null) {
-      for (Mapping mapping : mappings) {
-        if (mapping.getMappingType() == mappingType) {
-          for (NameType type : NameType.values()) {
-            if (type.get(mapping) != null && filter.test(type, mapping, input)) {
-              ret.add(mapping);
-            }
-          }
-        }
-      }
-    } else {
-      for (Mapping mapping : mappings) {
-        if (mapping.getMappingType() == mappingType) {
-          if (nameType.get(mapping) != null && filter.test(nameType, mapping, input)) {
-            ret.add(mapping);
-          }
-        }
-      }
-    }
-    return ret;
+    return Utils.parseMappings(mappings, nameType, mappingType, input, filter);
   }
 }

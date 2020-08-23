@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 public final class Mapping {
 
+  private final BaseMappingType baseType;
   private final MappingType mappingType;
   private final String obfuscated, intermediate, name, minecraftVersion;
   private final Mapping parentMapping;
@@ -15,6 +16,7 @@ public final class Mapping {
   private Map<String, String> obfuscatedProperties = new HashMap<>();
 
   public Mapping(
+      BaseMappingType baseType,
       MappingParser constructor,
       MappingType mappingType,
       String obfuscated,
@@ -22,6 +24,7 @@ public final class Mapping {
       String name,
       String minecraftVersion,
       @Nullable Mapping parentMapping) {
+    this.baseType = baseType;
     this.constructor = constructor;
     this.mappingType = mappingType;
     this.obfuscated = obfuscated;
@@ -29,6 +32,10 @@ public final class Mapping {
     this.name = name;
     this.minecraftVersion = minecraftVersion;
     this.parentMapping = parentMapping;
+  }
+
+  public BaseMappingType getBaseType() {
+    return baseType;
   }
 
   public MappingParser getConstructor() {
@@ -67,6 +74,11 @@ public final class Mapping {
           if (description == null) {
             return null;
           }
+          if (baseType == BaseMappingType.SPIGOT) {
+            // spigot doesn't provide obfuscated descriptions
+            // or well, we have to parse them ourselves, but they're basically useless
+            return description;
+          }
           if (description.contains("(")) {
             return SignatureHelper.mapSignature(t, description, minecraftVersion, constructor);
           } else {
@@ -103,7 +115,9 @@ public final class Mapping {
       builder.append("Parent ").append("`").append(parentMapping.getName()).append("` ;\n");
     }
     builder.append("Obfuscated: ").append("`").append(obfuscated).append("` ;\n");
-    builder.append("Intermediary: ").append("`").append(intermediate).append("` ;\n");
+    if (intermediate != null) { // spigot doesn't have intermediary mappings
+      builder.append("Intermediary: ").append("`").append(intermediate).append("` ;\n");
+    }
     builder.append("Named: ").append("`").append(name);
     String description = getDescription(NameType.NAME);
     if (description != null) {

@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
+import net.yatopia.bot.mappings.BaseMappingType;
 import net.yatopia.bot.mappings.Mapping;
 import net.yatopia.bot.mappings.MappingParser;
 import net.yatopia.bot.mappings.MappingType;
@@ -65,13 +66,21 @@ public class TinyV1Parser {
         String intermediate = info[order.getInt(1)];
         String name = info[order.getInt(2)];
         return new Mapping(
-            constructor, type, info[order.getInt(0)], intermediate, name, minecraftVersion, null);
+            BaseMappingType.YARN,
+            constructor,
+            type,
+            info[order.getInt(0)],
+            intermediate,
+            name,
+            minecraftVersion,
+            null);
       case METHOD:
       case FIELD:
         intermediate = info[order.getInt(1) + 2];
         name = info[order.getInt(2) + 2];
         Mapping mapping =
             new Mapping(
+                BaseMappingType.YARN,
                 constructor,
                 type,
                 info[order.getInt(0) + 2],

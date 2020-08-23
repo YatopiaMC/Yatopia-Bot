@@ -22,10 +22,11 @@ import net.yatopia.bot.commands.CommandJDKSpecific;
 import net.yatopia.bot.commands.CommandPing;
 import net.yatopia.bot.commands.CommandUpstream;
 import net.yatopia.bot.commands.CommandVanilla;
-import net.yatopia.bot.commands.CommandYarnSpecific;
+import net.yatopia.bot.commands.CommandMappingSpecific;
 import net.yatopia.bot.commands.CommandYatopiaSpecific;
 import net.yatopia.bot.listeners.MessageListener;
 import net.yatopia.bot.mappings.MappingParser;
+import net.yatopia.bot.mappings.spigot.SpigotMappingHandler;
 import net.yatopia.bot.mappings.yarn.YarnMappingHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +50,7 @@ public class YatopiaBot {
   private final ScheduledExecutorService executor;
 
   public MappingParser yarnParser;
-  private MappingParser spigotParser; // todo
+  public MappingParser spigotParser;
 
   private YatopiaBot(String token) {
     this.token = token;
@@ -105,6 +106,7 @@ public class YatopiaBot {
     CommandManager commandManager = new CommandManager(jda, settings);
     commandManager.setSettings(settings);
     yarnParser = new YarnMappingHandler();
+    spigotParser = new SpigotMappingHandler();
     commandManager.registerCommands(
         new CommandJDKSpecific(),
         new CommandDownloadSpecific(),
@@ -112,7 +114,7 @@ public class YatopiaBot {
         new CommandAsk(),
         new CommandVanilla(),
         new CommandUpstream(),
-        new CommandYarnSpecific(this),
+        new CommandMappingSpecific(this),
         new CommandPing(),
         new CommandShutdown("252049584598024192"));
 

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public final class MappingVersion {
+public final class YarnMappingVersion {
 
   private final String gameVersion, separator;
   private final int build;
@@ -12,7 +12,7 @@ public final class MappingVersion {
   private final boolean stable;
 
   @JsonCreator
-  public MappingVersion(
+  public YarnMappingVersion(
       @JsonProperty("gameVersion") String gameVersion,
       @JsonProperty("separator") String separator,
       @JsonProperty("build") int build,

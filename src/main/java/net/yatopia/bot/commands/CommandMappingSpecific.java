@@ -10,20 +10,22 @@ import com.mrivanplays.jdcf.data.CommandUsage;
 import java.util.List;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.yatopia.bot.YatopiaBot;
+import net.yatopia.bot.mappings.BaseMappingType;
 import net.yatopia.bot.mappings.Mapping;
 import net.yatopia.bot.mappings.MappingPaginator;
+import net.yatopia.bot.mappings.MappingParser;
 import net.yatopia.bot.mappings.MappingType;
 import net.yatopia.bot.mappings.NoSuchVersionException;
 import org.jetbrains.annotations.NotNull;
 
-@CommandAliases("yc|ym|yf")
-@CommandDescription("Yarn specific mappings")
-@CommandUsage("yc|?ym|?yf [mapping] [version] (page)")
-public class CommandYarnSpecific extends Command {
+@CommandAliases("yc|ym|yf|bc|bm|bf")
+@CommandDescription("Mapping specific commands. `y` for yarn, `b` for bukkit/spigot/md_5's")
+@CommandUsage("yc|?ym|?yf|?bc|?bm|?bf [mapping] [version] (page)")
+public class CommandMappingSpecific extends Command {
 
   private final YatopiaBot bot;
 
-  public CommandYarnSpecific(YatopiaBot bot) {
+  public CommandMappingSpecific(YatopiaBot bot) {
     this.bot = bot;
   }
 
@@ -32,18 +34,34 @@ public class CommandYarnSpecific extends Command {
     String alias = context.getAlias();
     MessageChannel channel = context.getChannel();
     MappingType mappingType;
+    BaseMappingType baseType;
     switch (alias) {
       case "yc":
         mappingType = MappingType.CLASS;
+        baseType = BaseMappingType.YARN;
         break;
       case "ym":
         mappingType = MappingType.METHOD;
+        baseType = BaseMappingType.YARN;
         break;
       case "yf":
         mappingType = MappingType.FIELD;
+        baseType = BaseMappingType.YARN;
+        break;
+      case "bc":
+        mappingType = MappingType.CLASS;
+        baseType = BaseMappingType.SPIGOT;
+        break;
+      case "bm":
+        mappingType = MappingType.METHOD;
+        baseType = BaseMappingType.SPIGOT;
+        break;
+      case "bf":
+        mappingType = MappingType.FIELD;
+        baseType = BaseMappingType.SPIGOT;
         break;
       default:
-        throw new IllegalArgumentException("Wat did just happen? CommandYarnSpecific");
+        throw new IllegalArgumentException("Wat did just happen? CommandMappingSpecific");
     }
     args.nextString()
         .ifPresent(
@@ -53,10 +71,13 @@ public class CommandYarnSpecific extends Command {
                         version ->
                             args.nextInt()
                                 .ifPresent(
-                                    page -> handle(channel, mappingType, version, mapping, page))
+                                    page ->
+                                        handle(
+                                            channel, baseType, mappingType, version, mapping, page))
                                 .orElse(
                                     failReason ->
-                                        handle(channel, mappingType, version, mapping, 1)))
+                                        handle(
+                                            channel, baseType, mappingType, version, mapping, 1)))
                     .orElse(
                         failReason -> {
                           if (failReason == FailReason.ARGUMENT_NOT_TYPED) {
@@ -73,9 +94,15 @@ public class CommandYarnSpecific extends Command {
   }
 
   private void handle(
-      MessageChannel channel, MappingType mappingType, String version, String mapping, int page) {
+      MessageChannel channel,
+      BaseMappingType baseType,
+      MappingType mappingType,
+      String version,
+      String mapping,
+      int page) {
     try {
-      List<Mapping> mappings = bot.yarnParser.parseMapping(mappingType, version, mapping);
+      MappingParser parser = baseType == BaseMappingType.SPIGOT ? bot.spigotParser : bot.yarnParser;
+      List<Mapping> mappings = parser.parseMapping(mappingType, version, mapping);
       if (mappings.isEmpty()) {
         channel.sendMessage("No information found for: " + mapping).queue();
         return;

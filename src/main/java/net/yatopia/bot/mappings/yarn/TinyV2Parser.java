@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipError;
+import net.yatopia.bot.mappings.BaseMappingType;
 import net.yatopia.bot.mappings.Mapping;
 import net.yatopia.bot.mappings.MappingParser;
 import net.yatopia.bot.mappings.MappingType;
@@ -144,7 +145,15 @@ public class TinyV2Parser {
         parent = this.parent.bake();
       }
       Mapping mapping =
-          new Mapping(constructor, type, original, intermediate, name, minecraftVersion, parent);
+          new Mapping(
+              BaseMappingType.YARN,
+              constructor,
+              type,
+              original,
+              intermediate,
+              name,
+              minecraftVersion,
+              parent);
       mapping.getObfuscatedProperties().put("owner", owner);
       mapping.getObfuscatedProperties().put("description", description);
       return mapping;
@@ -166,7 +175,8 @@ public class TinyV2Parser {
   private final PartialMapping HEADER = new Dummy();
   private final PartialMapping UNKNOWN = new Dummy();
 
-  private List<Mapping> parseV2(List<String> lines, String minecraftVersion, MappingParser constructor) throws IOException {
+  private List<Mapping> parseV2(
+      List<String> lines, String minecraftVersion, MappingParser constructor) throws IOException {
     List<Mapping> ret = new ArrayList<>();
     Deque<PartialMapping> sections = new LinkedList<>();
     Map<String, String> properties = new HashMap<>();
