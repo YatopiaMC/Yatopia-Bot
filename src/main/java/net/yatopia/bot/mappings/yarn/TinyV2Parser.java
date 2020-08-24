@@ -1,7 +1,5 @@
 package net.yatopia.bot.mappings.yarn;
 
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -23,7 +21,7 @@ import net.yatopia.bot.mappings.Mapping;
 import net.yatopia.bot.mappings.MappingParser;
 import net.yatopia.bot.mappings.MappingType;
 import net.yatopia.bot.mappings.NameType;
-import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 public class TinyV2Parser {
 
@@ -65,17 +63,9 @@ public class TinyV2Parser {
       return type;
     }
 
-    public String original() {
-      return original;
-    }
-
     public PartialMapping original(String original) {
       this.original = original;
       return this;
-    }
-
-    public String intermediate() {
-      return intermediate;
     }
 
     public PartialMapping intermediate(String intermediate) {
@@ -83,26 +73,9 @@ public class TinyV2Parser {
       return this;
     }
 
-    public String name() {
-      return name;
-    }
-
     public PartialMapping name(String name) {
       this.name = name;
       return this;
-    }
-
-    public String owner() {
-      return owner;
-    }
-
-    public PartialMapping owner(String owner) {
-      this.owner = owner;
-      return this;
-    }
-
-    public String desc() {
-      return description;
     }
 
     public PartialMapping desc(String description) {
@@ -110,12 +83,9 @@ public class TinyV2Parser {
       return this;
     }
 
-    public PartialMapping parent() {
-      return parent;
-    }
-
     public PartialMapping parent(PartialMapping parent) {
       this.parent = parent;
+      this.owner = parent.original;
       return this;
     }
 
@@ -132,9 +102,9 @@ public class TinyV2Parser {
       }
     }
 
-    PartialMapping applyNames(String[] values, Object2IntMap<NameType> order, int start) {
-      for (Object2IntMap.Entry<NameType> e : order.object2IntEntrySet()) {
-        name(e.getKey(), values[e.getIntValue() + start]);
+    PartialMapping applyNames(String[] values, Map<NameType, Integer> order, int start) {
+      for (Map.Entry<NameType, Integer> e : order.entrySet()) {
+        name(e.getKey(), values[e.getValue() + start]);
       }
       return this;
     }
@@ -176,11 +146,11 @@ public class TinyV2Parser {
   private final PartialMapping UNKNOWN = new Dummy();
 
   private List<Mapping> parseV2(
-      List<String> lines, String minecraftVersion, MappingParser constructor) throws IOException {
+      List<String> lines, String minecraftVersion, MappingParser constructor) {
     List<Mapping> ret = new ArrayList<>();
     Deque<PartialMapping> sections = new LinkedList<>();
     Map<String, String> properties = new HashMap<>();
-    Object2IntMap<NameType> names = new Object2IntArrayMap<>(4);
+    Map<NameType, Integer> names = new HashMap<>(4);
     for (String s : lines) {
       int depth = sections.size();
       for (int i = 0; i < depth; i++) {
@@ -224,7 +194,6 @@ public class TinyV2Parser {
           sections.push(
               new PartialMapping(MappingType.METHOD, minecraftVersion, constructor)
                   .desc(values[1])
-                  .owner(context.original())
                   .parent(context)
                   .applyNames(values, names, 2));
           break;
@@ -235,7 +204,6 @@ public class TinyV2Parser {
           sections.push(
               new PartialMapping(MappingType.FIELD, minecraftVersion, constructor)
                   .desc(values[1])
-                  .owner(context.original())
                   .parent(context)
                   .applyNames(values, names, 2));
           break;

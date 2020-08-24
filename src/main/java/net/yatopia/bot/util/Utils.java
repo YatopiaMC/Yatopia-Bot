@@ -7,11 +7,15 @@ import java.util.List;
 import net.yatopia.bot.mappings.Mapping;
 import net.yatopia.bot.mappings.MappingType;
 import net.yatopia.bot.mappings.NameType;
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import org.jetbrains.annotations.Nullable;
 
 public final class Utils {
 
   public static final ObjectMapper JSON_MAPPER = new ObjectMapper();
+  public static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
   public static final TriPredicate<NameType, Mapping, String> EXACT =
       (type, mapping, input) -> type.get(mapping).equalsIgnoreCase(input);
   public static final TriPredicate<NameType, Mapping, String> ENDS_WITH =
@@ -30,6 +34,18 @@ public final class Utils {
     return pages;
   }
 
+  public static Call newCall(Request request) {
+    return HTTP_CLIENT.newCall(request);
+  }
+
+  public static Request newRequest(String url) {
+    return newRequestBuilder(url).build();
+  }
+
+  public static Request.Builder newRequestBuilder(String url) {
+    return new Request.Builder().get().url(url).addHeader("User-Agent", "Yatopia-Bot");
+  }
+
   public static List<Mapping> parseMappings(
       List<Mapping> mappings,
       @Nullable NameType nameType,
@@ -45,9 +61,7 @@ public final class Utils {
     }
     List<Mapping> ret = new ArrayList<>();
     String parentSearchCut =
-        parentSearched == null
-            ? null
-            : input.substring(parentSearched.length() + 1);
+        parentSearched == null ? null : input.substring(parentSearched.length() + 1);
     if (parentSearched != null && nameType == null) {
       for (Mapping mapping : mappings) {
         if (mapping.getMappingType() == mappingType && mapping.getParentMapping() != null) {

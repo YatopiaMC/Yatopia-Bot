@@ -9,8 +9,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
@@ -24,7 +24,8 @@ import net.yatopia.bot.mappings.NameType;
 import net.yatopia.bot.mappings.NoSuchVersionException;
 import net.yatopia.bot.util.TriPredicate;
 import net.yatopia.bot.util.Utils;
-import org.apache.commons.io.FileUtils;
+import okhttp3.Call;
+import okhttp3.Response;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,17 +63,19 @@ public final class YarnMappingHandler implements MappingParser {
     }
     YarnMappingVersion version;
     try {
-      URL versionsUrl =
-          new URL("https://meta.fabricmc.net/v1/versions/mappings/" + mcVersion + "/");
-      HttpURLConnection connection = (HttpURLConnection) versionsUrl.openConnection();
-      connection.setRequestMethod("GET");
-      connection.addRequestProperty("User-Agent", "Yatopia-Bot");
-      try (InputStream in = connection.getInputStream()) {
-        YarnMappingVersion[] versions = Utils.JSON_MAPPER.readValue(in, YarnMappingVersion[].class);
-        if (versions == null || versions.length == 0) {
-          throw new NoSuchVersionException(mcVersion);
+      Call call =
+          Utils.newCall(
+              Utils.newRequest(
+                  "https://meta.fabricmc.net/v1/versions/mappings/" + mcVersion + "/"));
+      try (Response response = call.execute()) {
+        try (InputStream in = response.body().byteStream()) {
+          YarnMappingVersion[] versions =
+              Utils.JSON_MAPPER.readValue(in, YarnMappingVersion[].class);
+          if (versions == null || versions.length == 0) {
+            throw new NoSuchVersionException(mcVersion);
+          }
+          version = versions[0];
         }
-        version = versions[0];
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -106,23 +109,29 @@ public final class YarnMappingHandler implements MappingParser {
     }
     try {
       String mappingsUrl = version.getMavenUrl("https://maven.fabricmc.net/", "mergedv2", "jar");
-      URL url = new URL(mappingsUrl);
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-      if (isBadCode(connection.getResponseCode())) {
+      Call v2Call = Utils.newCall(Utils.newRequest(mappingsUrl));
+      Response v2Response = v2Call.execute();
+      if (isBadCode(v2Response.code())) {
         // v1 mappings
-        connection.disconnect();
+        v2Response.close();
         mappingsUrl = version.getMavenUrl("https://maven.fabricmc.net/", "tiny", "gz");
-        url = new URL(mappingsUrl);
-        if (mappingsFolder.exists()) {
-          mappingsFolder.delete();
+        Call v1Call = Utils.newCall(Utils.newRequest(mappingsUrl));
+        try (Response v1Response = v1Call.execute()) {
+          if (mappingsFolder.exists()) {
+            mappingsFolder.delete();
+          }
+          mappingsFolder.mkdirs();
+          String fileName = mappingsUrl.substring(mappingsUrl.lastIndexOf('/') + 1);
+          File mappingFile = mappingsFolder.toPath().resolve(fileName).toFile();
+          try (OutputStream out = new FileOutputStream(mappingFile)) {
+            try (InputStream in = v1Response.body().byteStream()) {
+              IOUtils.copy(in, out);
+            }
+          }
+          mappingCache.invalidate(mcVersion);
+          List<Mapping> mappings = TinyV1Parser.INSTANCE.parse(mappingFile, mcVersion, this);
+          mappingCache.put(mcVersion, mappings);
         }
-        mappingsFolder.mkdirs();
-        String fileName = mappingsUrl.substring(mappingsUrl.lastIndexOf('/') + 1);
-        File mappingFile = mappingsFolder.toPath().resolve(fileName).toFile();
-        FileUtils.copyURLToFile(url, mappingFile);
-        mappingCache.invalidate(mcVersion);
-        List<Mapping> mappings = TinyV1Parser.INSTANCE.parse(mappingFile, mcVersion, this);
-        mappingCache.put(mcVersion, mappings);
       } else {
         // v2 mappings
         if (mappingsFolder.exists()) {
@@ -132,9 +141,11 @@ public final class YarnMappingHandler implements MappingParser {
         String fileName = mappingsUrl.substring(mappingsUrl.lastIndexOf('/') + 1);
         File mappingFile = mappingsFolder.toPath().resolve(fileName).toFile();
         try (OutputStream out = new FileOutputStream(mappingFile)) {
-          try (InputStream in = connection.getInputStream()) {
+          try (InputStream in = v2Response.body().byteStream()) {
             IOUtils.copy(in, out);
           }
+        } finally {
+          v2Response.close();
         }
         mappingCache.invalidate(mcVersion);
         List<Mapping> mappings = TinyV2Parser.INSTANCE.parse(mappingFile, mcVersion, this);
@@ -145,8 +156,10 @@ public final class YarnMappingHandler implements MappingParser {
         versionFile.delete();
       }
       versionFile.createNewFile();
-      FileUtils.write(
-          versionFile, Utils.JSON_MAPPER.writeValueAsString(version), StandardCharsets.UTF_8);
+      try (Writer writer =
+          new OutputStreamWriter(new FileOutputStream(versionFile), StandardCharsets.UTF_8)) {
+        Utils.JSON_MAPPER.writeValue(writer, version);
+      }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

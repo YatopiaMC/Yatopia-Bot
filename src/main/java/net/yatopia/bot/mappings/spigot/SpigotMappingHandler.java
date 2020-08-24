@@ -5,8 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -17,6 +15,8 @@ import net.yatopia.bot.mappings.NameType;
 import net.yatopia.bot.mappings.NoSuchVersionException;
 import net.yatopia.bot.util.TriPredicate;
 import net.yatopia.bot.util.Utils;
+import okhttp3.Call;
+import okhttp3.Response;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,23 +46,20 @@ public final class SpigotMappingHandler implements MappingParser {
         mappingsFolder.mkdirs();
         classMappingsFile.createNewFile();
         memberMappingsFile.createNewFile();
-        URL url = new URL(version.getClassMappings());
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.addRequestProperty("User-Agent", "Yatopia-Bot");
-        try (InputStream in = connection.getInputStream()) {
-          try (OutputStream out = new FileOutputStream(classMappingsFile)) {
-            IOUtils.copy(in, out);
+        Call classCall = Utils.newCall(Utils.newRequest(version.getClassMappings()));
+        try (Response response = classCall.execute()) {
+          try (InputStream in = response.body().byteStream()) {
+            try (OutputStream out = new FileOutputStream(classMappingsFile)) {
+              IOUtils.copy(in, out);
+            }
           }
         }
-        connection.disconnect();
-        url = new URL(version.getMemberMappings());
-        connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
-        connection.addRequestProperty("User-Agent", "Yatopia-Bot");
-        try (InputStream in = connection.getInputStream()) {
-          try (OutputStream out = new FileOutputStream(memberMappingsFile)) {
-            IOUtils.copy(in, out);
+        Call membersCall = Utils.newCall(Utils.newRequest(version.getMemberMappings()));
+        try (Response response = membersCall.execute()) {
+          try (InputStream in = response.body().byteStream()) {
+            try (OutputStream out = new FileOutputStream(memberMappingsFile)) {
+              IOUtils.copy(in, out);
+            }
           }
         }
         perVersion.put(
