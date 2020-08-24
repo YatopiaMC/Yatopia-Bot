@@ -19,10 +19,11 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.yatopia.bot.commands.CommandAsk;
 import net.yatopia.bot.commands.CommandDownloadSpecific;
 import net.yatopia.bot.commands.CommandJDKSpecific;
+import net.yatopia.bot.commands.CommandMappingSpecific;
 import net.yatopia.bot.commands.CommandPing;
+import net.yatopia.bot.commands.CommandShitspiller;
 import net.yatopia.bot.commands.CommandUpstream;
 import net.yatopia.bot.commands.CommandVanilla;
-import net.yatopia.bot.commands.CommandMappingSpecific;
 import net.yatopia.bot.commands.CommandYatopiaSpecific;
 import net.yatopia.bot.listeners.MessageListener;
 import net.yatopia.bot.mappings.MappingParser;
@@ -116,7 +117,8 @@ public class YatopiaBot {
         new CommandUpstream(),
         new CommandMappingSpecific(this),
         new CommandPing(),
-        new CommandShutdown("252049584598024192"));
+        new CommandShutdown("252049584598024192"),
+        new CommandShitspiller());
 
     executor.scheduleAtFixedRate(
         new Runnable() {

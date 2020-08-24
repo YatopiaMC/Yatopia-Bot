@@ -10,9 +10,9 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.yatopia.bot.EmbedUtil;
 import org.jetbrains.annotations.NotNull;
 
-@CommandAliases("jdk14|jdk15|flags|openj91.16.2|openj9")
+@CommandAliases("jdk14|jdk15|flags|openj9")
 @CommandDescription("JDK specific commands")
-@CommandUsage("jdk14|?jdk15|?flags|?openj91.16.2|?openj9")
+@CommandUsage("jdk14|?jdk15|?flags|?openj9")
 public class CommandJDKSpecific extends Command {
 
   @Override
@@ -48,15 +48,6 @@ public class CommandJDKSpecific extends Command {
         channel
             .sendMessage(
                 EmbedUtil.withAuthor(context.getAuthor()).setDescription(descriptionFlags).build())
-            .queue();
-        break;
-      case "openj91.16.2":
-        channel
-            .sendMessage(
-                EmbedUtil.withAuthor(context.getAuthor())
-                    .setDescription(
-                        "You can't start Minecraft 1.16.2 with OpenJ9 and we do not recommend OpenJ9, use `?flags` for the recommended flags.")
-                    .build())
             .queue();
         break;
       case "openj9":

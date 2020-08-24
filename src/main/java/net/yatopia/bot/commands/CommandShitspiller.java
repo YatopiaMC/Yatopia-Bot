@@ -9,20 +9,19 @@ import com.mrivanplays.jdcf.data.CommandUsage;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import org.jetbrains.annotations.NotNull;
 
-@CommandAliases("ping")
-@CommandDescription("Shows latencies")
-@CommandUsage("ping")
-public class CommandPing extends Command {
+@CommandAliases("shitspiller")
+@CommandDescription("Whenever someone starts spilling shit in the chat")
+@CommandUsage("shitspiller")
+public class CommandShitspiller extends Command {
 
   @Override
   public boolean execute(@NotNull CommandExecutionContext context, @NotNull CommandArguments args) {
     MessageChannel channel = context.getChannel();
-    long gateway = context.getJda().getGatewayPing();
-    channel.sendMessage("Heartbeat latency: " + gateway + "ms").queue();
-    context
-        .getJda()
-        .getRestPing()
-        .queue(latency -> channel.sendMessage("Latency to Discord API: " + latency + "ms").queue());
+    String message =
+        "Stop spilling shit! We provide you information that is confirmed to be true "
+            + "which works for all the other people. Facts are that we (probably) know more than you, "
+            + "so stop spilling shit.";
+    channel.sendMessage(message).queue();
     return true;
   }
 }
