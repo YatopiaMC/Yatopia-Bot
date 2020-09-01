@@ -14,6 +14,9 @@ import org.jetbrains.annotations.Nullable;
 
 public final class Utils {
 
+  // cuz jvm complains every time I do NameType.values()
+  public static NameType[] NAMETYPE_VALUES = NameType.values();
+
   public static final ObjectMapper JSON_MAPPER = new ObjectMapper();
   public static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
   public static final TriPredicate<NameType, Mapping, String> EXACT =
@@ -65,7 +68,7 @@ public final class Utils {
     if (parentSearched != null && nameType == null) {
       for (Mapping mapping : mappings) {
         if (mapping.getMappingType() == mappingType && mapping.getParentMapping() != null) {
-          for (NameType type : NameType.values()) {
+          for (NameType type : NAMETYPE_VALUES) {
             String parent = type.get(mapping.getParentMapping());
             if (parent != null && parent.endsWith(parentSearched)) {
               String t = type.get(mapping);
@@ -79,7 +82,7 @@ public final class Utils {
     } else if (parentSearched == null && nameType == null) {
       for (Mapping mapping : mappings) {
         if (mapping.getMappingType() == mappingType) {
-          for (NameType type : NameType.values()) {
+          for (NameType type : NAMETYPE_VALUES) {
             if (type.get(mapping) != null && filter.test(type, mapping, input)) {
               ret.add(mapping);
             }
@@ -97,8 +100,16 @@ public final class Utils {
     } else {
       for (Mapping mapping : mappings) {
         if (mapping.getMappingType() == mappingType && mapping.getParentMapping() != null) {
-          String parent = nameType.get(mapping.getParentMapping());
-          if (parent != null && parent.endsWith(parentSearched)) {
+          String parent = null;
+          Mapping parentMapping = mapping.getParentMapping();
+          for (NameType parentNameType : NAMETYPE_VALUES) {
+            String tested = parentNameType.get(parentMapping);
+            if (tested != null && tested.endsWith(parentSearched)) {
+              parent = tested;
+              break;
+            }
+          }
+          if (parent != null) {
             String t = nameType.get(mapping);
             if (t != null && filter.test(nameType, mapping, parentSearchCut)) {
               ret.add(mapping);
