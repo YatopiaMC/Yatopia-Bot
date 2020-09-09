@@ -10,9 +10,9 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.yatopia.bot.EmbedUtil;
 import org.jetbrains.annotations.NotNull;
 
-@CommandAliases("jdk14|jdk15|flags|openj9")
+@CommandAliases("jdk|flags|openj9|jvm|graalvm")
 @CommandDescription("JDK specific commands")
-@CommandUsage("jdk14|?jdk15|?flags|?openj9")
+@CommandUsage("jdk|?flags|?openj9|?jvm|?graalvm")
 public class CommandJDKSpecific extends Command {
 
   @Override
@@ -20,43 +20,32 @@ public class CommandJDKSpecific extends Command {
     String alias = context.getAlias();
     MessageChannel channel = context.getChannel();
     switch (alias) {
-      case "jdk14":
-        String description14 =
-            "JDK 14 is one of the fastest stable JDKs so it's nice for a production environment"
-                + '\n'
-                + "Download from here: https://jdk.java.net/14/";
+      case "jdk":
+        String descriptionJdk =
+            "Our advice on JDK is to use the latest LTS (Long Term Support) version, currently jdk 11";
         channel
             .sendMessage(
-                EmbedUtil.withAuthor(context.getAuthor()).setDescription(description14).build())
-            .queue();
-        break;
-      case "jdk15":
-        String description15 =
-            "JDK 15 is the fastest JDK that works with Yatopia, you can download it here: https://jdk.java.net/15/ . Run `?flags` for more information on flags."
-                + '\n'
-                + "WARNING: JDK 15 is currently in the a pre-release state meaning it may contain issues, use it at your own risk.";
-        channel
-            .sendMessage(
-                EmbedUtil.withAuthor(context.getAuthor()).setDescription(description15).build())
+                EmbedUtil.withAuthor(context.getAuthor()).setDescription(descriptionJdk).build())
             .queue();
         break;
       case "flags":
         String descriptionFlags =
-            "ZGC is the best garbage collector for Yatopia."
-                + '\n'
-                + "<https://frama.link/Yatopiazgcflags> are the recommended flags to use.";
+            "We recommend using aikar's flags since there's no evidence that other flags (with other VMs) work better than aikar's. Of course, you're free to use and do whatever you want. https://mcflags.emc.gs/";
         channel
             .sendMessage(
                 EmbedUtil.withAuthor(context.getAuthor()).setDescription(descriptionFlags).build())
             .queue();
         break;
       case "openj9":
+      case "jvm":
+      case "graalvm":
+        String descriptionVm =
+            "Due to the lack of information and benchmarks (evidence) that can prove "
+                + alias
+                + " is better than HotSpot, our 2 cents here are to use HotSpot, since its the official JVM, developed by Oracle themselves. By no means this should mean to not use other VMs, you are free to do whatever you want.";
         channel
             .sendMessage(
-                EmbedUtil.withAuthor(context.getAuthor())
-                    .setDescription(
-                        "OpenJ9 doesn't run correctly with Yatopia, please use ZGC and the recommended flags (run `?flags`)")
-                    .build())
+                EmbedUtil.withAuthor(context.getAuthor()).setDescription(descriptionVm).build())
             .queue();
         break;
     }

@@ -11,10 +11,19 @@ public class MessageListener extends ListenerAdapter {
     if (event.getAuthor().isBot()) {
       return;
     }
-    if (event.getMessage().getContentRaw().toLowerCase().contains("yapfa")) {
+    String contentRaw = event.getMessage().getContentRaw().toLowerCase();
+    String authorMention = event.getAuthor().getAsMention();
+    if (contentRaw.contains("yapfa")) {
+      event.getChannel().sendMessage(authorMention + " , we're now Yatopia.").queue();
+    }
+    if (contentRaw.contains("minecraft")
+        && contentRaw.contains("single")
+        && (contentRaw.contains("thread") || contentRaw.contains("threaded"))) {
       event
           .getChannel()
-          .sendMessage(event.getAuthor().getAsMention() + " , we're now Yatopia.")
+          .sendMessage(
+              authorMention
+                  + " , minecraft is NOT single threaded. There's a DIFFERENCE FROM THE EARTH TO THE MOON between a \"thread\" and a \"core\". Minecraft in MOST OF THE TIMES can take up advantage only of 1 CORE, and that's why cpu clock speed is more important when you're getting a machine for your server.")
           .queue();
     }
   }
