@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiPredicate;
 import net.yatopia.bot.mappings.Mapping;
 import net.yatopia.bot.mappings.MappingType;
 import net.yatopia.bot.mappings.NameType;
@@ -19,10 +20,10 @@ public final class Utils {
 
   public static final ObjectMapper JSON_MAPPER = new ObjectMapper();
   public static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
-  public static final TriPredicate<NameType, Mapping, String> EXACT =
-      (type, mapping, input) -> type.get(mapping).equalsIgnoreCase(input);
-  public static final TriPredicate<NameType, Mapping, String> ENDS_WITH =
-      (type, mapping, input) -> type.get(mapping).endsWith(input);
+  public static final BiPredicate<String, String> EXACT =
+      (value, input) -> value.toLowerCase().equalsIgnoreCase(input.toLowerCase());
+  public static final BiPredicate<String, String> ENDS_WITH =
+      (value, input) -> value.toLowerCase().endsWith(input.toLowerCase());
 
   public static <T> List<List<T>> getPages(Collection<T> c, int pageSize) {
     List<T> list = new ArrayList<>(c);
@@ -54,7 +55,7 @@ public final class Utils {
       @Nullable NameType nameType,
       MappingType mappingType,
       String input,
-      TriPredicate<NameType, Mapping, String> filter) {
+      BiPredicate<String, String> filter) {
     String parentSearched = null;
     if (input.indexOf('#') != -1) {
       parentSearched = input.substring(0, input.indexOf('#'));
@@ -72,7 +73,7 @@ public final class Utils {
             String parent = type.get(mapping.getParentMapping());
             if (parent != null && parent.endsWith(parentSearched)) {
               String t = type.get(mapping);
-              if (t != null && filter.test(type, mapping, parentSearchCut)) {
+              if (t != null && filter.test(t, parentSearchCut)) {
                 ret.add(mapping);
               }
             }
@@ -83,7 +84,8 @@ public final class Utils {
       for (Mapping mapping : mappings) {
         if (mapping.getMappingType() == mappingType) {
           for (NameType type : NAMETYPE_VALUES) {
-            if (type.get(mapping) != null && filter.test(type, mapping, input)) {
+            String t = type.get(mapping);
+            if (t != null && filter.test(t, input)) {
               ret.add(mapping);
             }
           }
@@ -91,9 +93,10 @@ public final class Utils {
       }
     } else if (parentSearched == null) {
       for (Mapping mapping : mappings) {
+        String t = nameType.get(mapping);
         if (mapping.getMappingType() == mappingType
-            && nameType.get(mapping) != null
-            && filter.test(nameType, mapping, input)) {
+            && t != null
+            && filter.test(t, input)) {
           ret.add(mapping);
         }
       }
@@ -111,7 +114,7 @@ public final class Utils {
           }
           if (parent != null) {
             String t = nameType.get(mapping);
-            if (t != null && filter.test(nameType, mapping, parentSearchCut)) {
+            if (t != null && filter.test(t, parentSearchCut)) {
               ret.add(mapping);
             }
           }

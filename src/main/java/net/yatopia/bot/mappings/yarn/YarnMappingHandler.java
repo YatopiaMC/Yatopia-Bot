@@ -17,12 +17,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiPredicate;
 import net.yatopia.bot.mappings.Mapping;
 import net.yatopia.bot.mappings.MappingParser;
 import net.yatopia.bot.mappings.MappingType;
 import net.yatopia.bot.mappings.NameType;
 import net.yatopia.bot.mappings.NoSuchVersionException;
-import net.yatopia.bot.util.TriPredicate;
 import net.yatopia.bot.util.Utils;
 import okhttp3.Call;
 import okhttp3.Response;
@@ -188,7 +188,7 @@ public final class YarnMappingHandler implements MappingParser {
       MappingType mappingType,
       String mcVer,
       String input,
-      TriPredicate<NameType, Mapping, String> filter)
+      BiPredicate<String, String> filter)
       throws NoSuchVersionException {
     File data = new File(".", "data");
     if (!data.exists()) {

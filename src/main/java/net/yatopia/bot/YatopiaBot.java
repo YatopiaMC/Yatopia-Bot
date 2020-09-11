@@ -24,6 +24,7 @@ import net.yatopia.bot.commands.CommandPing;
 import net.yatopia.bot.commands.CommandShitspiller;
 import net.yatopia.bot.commands.CommandUpstream;
 import net.yatopia.bot.commands.CommandVanilla;
+import net.yatopia.bot.commands.CommandVroomVroom;
 import net.yatopia.bot.commands.CommandYatopiaSpecific;
 import net.yatopia.bot.listeners.MessageListener;
 import net.yatopia.bot.mappings.MappingParser;
@@ -118,7 +119,8 @@ public class YatopiaBot {
         new CommandMappingSpecific(this),
         new CommandPing(),
         new CommandShutdown("252049584598024192"),
-        new CommandShitspiller());
+        new CommandShitspiller(),
+        new CommandVroomVroom());
 
     executor.scheduleAtFixedRate(
         new Runnable() {
