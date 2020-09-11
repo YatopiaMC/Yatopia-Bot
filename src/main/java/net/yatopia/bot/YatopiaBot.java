@@ -61,10 +61,10 @@ public class YatopiaBot {
 
   public void start() throws LoginException, InterruptedException {
     JDA jda =
-        JDABuilder.create(GatewayIntent.GUILD_MESSAGES)
+        JDABuilder.create(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS)
             .setToken(token)
             .setActivity(Activity.playing("Yatopia.jar"))
-            .disableCache(CacheFlag.EMOTE, CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
+            .disableCache(CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
             .addEventListeners(new MessageListener())
             .build()
             .awaitReady();
