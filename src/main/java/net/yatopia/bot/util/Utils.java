@@ -72,9 +72,12 @@ public final class Utils {
           for (NameType type : NAMETYPE_VALUES) {
             String parent = type.get(mapping.getParentMapping());
             if (parent != null && parent.endsWith(parentSearched)) {
-              String t = type.get(mapping);
-              if (t != null && filter.test(t, parentSearchCut)) {
-                ret.add(mapping);
+              // separately lookup
+              for (NameType type1 : NAMETYPE_VALUES) {
+                String t = type1.get(mapping);
+                if (t != null && filter.test(t, parentSearchCut)) {
+                  ret.add(mapping);
+                }
               }
             }
           }
