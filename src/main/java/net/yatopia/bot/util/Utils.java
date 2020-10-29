@@ -4,14 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.BiPredicate;
 import net.yatopia.bot.mappings.Mapping;
 import net.yatopia.bot.mappings.MappingType;
 import net.yatopia.bot.mappings.NameType;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import org.jetbrains.annotations.Nullable;
 
 public final class Utils {
 
@@ -20,10 +18,6 @@ public final class Utils {
 
   public static final ObjectMapper JSON_MAPPER = new ObjectMapper();
   public static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
-  public static final BiPredicate<String, String> EXACT =
-      (value, input) -> value.toLowerCase().equalsIgnoreCase(input.toLowerCase());
-  public static final BiPredicate<String, String> ENDS_WITH =
-      (value, input) -> value.toLowerCase().endsWith(input.toLowerCase());
 
   public static <T> List<List<T>> getPages(Collection<T> c, int pageSize) {
     List<T> list = new ArrayList<>(c);
@@ -52,10 +46,8 @@ public final class Utils {
 
   public static List<Mapping> parseMappings(
       List<Mapping> mappings,
-      @Nullable NameType nameType,
       MappingType mappingType,
-      String input,
-      BiPredicate<String, String> filter) {
+      String input) {
     String parentSearched = null;
     if (input.indexOf('#') != -1) {
       parentSearched = input.substring(0, input.indexOf('#'));
@@ -66,16 +58,16 @@ public final class Utils {
     List<Mapping> ret = new ArrayList<>();
     String parentSearchCut =
         parentSearched == null ? null : input.substring(parentSearched.length() + 1);
-    if (parentSearched != null && nameType == null) {
+    if (parentSearched != null) {
       for (Mapping mapping : mappings) {
         if (mapping.getMappingType() == mappingType && mapping.getParentMapping() != null) {
-          for (NameType type : NAMETYPE_VALUES) {
-            String parent = type.get(mapping.getParentMapping());
+          for (NameType nameType : NAMETYPE_VALUES) {
+            String parent = nameType.get(mapping.getParentMapping());
             if (parent != null && parent.endsWith(parentSearched)) {
               // separately lookup
-              for (NameType type1 : NAMETYPE_VALUES) {
-                String t = type1.get(mapping);
-                if (t != null && filter.test(t, parentSearchCut)) {
+              for (NameType nameType1 : NAMETYPE_VALUES) {
+                String t = nameType1.get(mapping);
+                if (t != null && t.endsWith(parentSearchCut) && !ret.contains(mapping)) {
                   ret.add(mapping);
                 }
               }
@@ -83,41 +75,12 @@ public final class Utils {
           }
         }
       }
-    } else if (parentSearched == null && nameType == null) {
-      for (Mapping mapping : mappings) {
-        if (mapping.getMappingType() == mappingType) {
-          for (NameType type : NAMETYPE_VALUES) {
-            String t = type.get(mapping);
-            if (t != null && filter.test(t, input)) {
-              ret.add(mapping);
-            }
-          }
-        }
-      }
-    } else if (parentSearched == null) {
-      for (Mapping mapping : mappings) {
-        String t = nameType.get(mapping);
-        if (mapping.getMappingType() == mappingType
-            && t != null
-            && filter.test(t, input)) {
-          ret.add(mapping);
-        }
-      }
     } else {
       for (Mapping mapping : mappings) {
-        if (mapping.getMappingType() == mappingType && mapping.getParentMapping() != null) {
-          String parent = null;
-          Mapping parentMapping = mapping.getParentMapping();
-          for (NameType parentNameType : NAMETYPE_VALUES) {
-            String tested = parentNameType.get(parentMapping);
-            if (tested != null && tested.endsWith(parentSearched)) {
-              parent = tested;
-              break;
-            }
-          }
-          if (parent != null) {
+        if (mapping.getMappingType() == mappingType) {
+          for (NameType nameType : NAMETYPE_VALUES) {
             String t = nameType.get(mapping);
-            if (t != null && filter.test(t, parentSearchCut)) {
+            if (t != null && t.endsWith(input) && !ret.contains(mapping)) {
               ret.add(mapping);
             }
           }

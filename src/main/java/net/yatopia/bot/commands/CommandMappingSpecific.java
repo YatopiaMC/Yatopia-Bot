@@ -13,7 +13,6 @@ import net.yatopia.bot.YatopiaBot;
 import net.yatopia.bot.mappings.BaseMappingType;
 import net.yatopia.bot.mappings.Mapping;
 import net.yatopia.bot.mappings.MappingPaginator;
-import net.yatopia.bot.mappings.MappingParser;
 import net.yatopia.bot.mappings.MappingType;
 import net.yatopia.bot.mappings.NoSuchVersionException;
 import org.jetbrains.annotations.NotNull;
@@ -101,8 +100,9 @@ public class CommandMappingSpecific extends Command {
       String mapping,
       int page) {
     try {
-      MappingParser parser = baseType == BaseMappingType.SPIGOT ? bot.spigotParser : bot.yarnParser;
-      List<Mapping> mappings = parser.parseMapping(mappingType, version, mapping);
+      List<Mapping> mappings =
+          (baseType == BaseMappingType.SPIGOT ? bot.spigotParser : bot.yarnParser)
+              .parseMapping(mappingType, version, mapping);
       if (mappings.isEmpty()) {
         channel.sendMessage("No information found for: " + mapping).queue();
         return;

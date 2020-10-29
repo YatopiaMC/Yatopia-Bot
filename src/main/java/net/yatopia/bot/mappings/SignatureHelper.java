@@ -34,11 +34,10 @@ public class SignatureHelper {
       String name = type.getInternalName();
       Mapping match = null;
       if (NOTCH_PARAM.matcher(name).matches()) {
-        List<Mapping> found =
-            parser.parseMappingExact(NameType.ORIGINAL, MappingType.CLASS, mcVer, name);
-        for (Mapping f : found) {
-          if (f.getObfuscated().equals(name)) {
-            match = f;
+        for (Mapping mapping : parser.getAllMappings(mcVer)) {
+          if (mapping.getMappingType() == MappingType.CLASS
+              && mapping.getObfuscated().toLowerCase().equalsIgnoreCase(name.toLowerCase())) {
+            match = mapping;
             break;
           }
         }
