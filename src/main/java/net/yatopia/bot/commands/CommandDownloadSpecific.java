@@ -10,9 +10,9 @@ import net.dv8tion.jda.api.entities.MessageChannel;
 import net.yatopia.bot.EmbedUtil;
 import org.jetbrains.annotations.NotNull;
 
-@CommandAliases("download|1.15.2|1.16.1|1.16.2|1.16.3")
+@CommandAliases("download|1.15.2|1.16.1|1.16.2|1.16.3|1.16.4")
 @CommandDescription("Download specific commands.")
-@CommandUsage("download|?1.15.2|?1.16.1|?1.16.2|?1.16.3")
+@CommandUsage("download|?1.15.2|?1.16.1|?1.16.2|?1.16.3|?1.16.4")
 public class CommandDownloadSpecific extends Command {
 
   @Override
@@ -48,6 +48,11 @@ public class CommandDownloadSpecific extends Command {
       case "1.16.3":
         channel
             .sendMessage("<https://ci.codemc.io/job/YatopiaMC/job/Yatopia/job/ver%252F1.16.3/>")
+            .queue();
+        break;
+      case "1.16.4":
+        channel
+            .sendMessage("<https://ci.codemc.io/job/YatopiaMC/job/Yatopia/job/ver%252F1.16.4/>")
             .queue();
         break;
     }
