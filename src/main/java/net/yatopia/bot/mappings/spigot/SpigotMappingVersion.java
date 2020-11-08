@@ -13,6 +13,11 @@ public enum SpigotMappingVersion {
       "1.16.3",
       "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/raw/mappings/bukkit-1.16.3-cl.csrg?at=b2025bdddde79aea004399ec5f3652a1bce56b7a",
       "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/raw/mappings/bukkit-1.16.3-members.csrg?at=b2025bdddde79aea004399ec5f3652a1bce56b7a"
+  ),
+  v1_16_4(
+      "1.16.4",
+      "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/raw/mappings/bukkit-1.16.4-cl.csrg?at=501ea060743c7bba4436878207e4f1232298efce",
+      "https://hub.spigotmc.org/stash/projects/SPIGOT/repos/builddata/raw/mappings/bukkit-1.16.4-members.csrg?at=501ea060743c7bba4436878207e4f1232298efce"
   );
   private final String mcVersion, classMappings, memberMappings;
 
