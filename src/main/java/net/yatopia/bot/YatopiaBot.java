@@ -79,7 +79,6 @@ public class YatopiaBot {
     JDA jda =
         JDABuilder.create(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS)
             .setToken(token)
-            .setEventPool(executor)
             .setGatewayPool(executor)
             .setCallbackPool(executor)
             .setRateLimitPool(executor)

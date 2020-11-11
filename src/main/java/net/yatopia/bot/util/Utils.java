@@ -32,6 +32,21 @@ public final class Utils {
     return pages;
   }
 
+  public static boolean containsSingleWord(String content, String word) {
+    content = content.toLowerCase();
+    word = word.toLowerCase();
+    if (content.indexOf(' ') == -1 && word.indexOf(' ') == -1) {
+      return content.equalsIgnoreCase(word);
+    }
+    String[] parts = content.split(" ");
+    for (String part : parts) {
+      if (part.toLowerCase().equalsIgnoreCase(word)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public static Call newCall(Request request) {
     return HTTP_CLIENT.newCall(request);
   }
@@ -45,9 +60,7 @@ public final class Utils {
   }
 
   public static List<Mapping> parseMappings(
-      List<Mapping> mappings,
-      MappingType mappingType,
-      String input) {
+      List<Mapping> mappings, MappingType mappingType, String input) {
     String parentSearched = null;
     if (input.indexOf('#') != -1) {
       parentSearched = input.substring(0, input.indexOf('#'));
