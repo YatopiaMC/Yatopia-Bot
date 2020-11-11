@@ -40,7 +40,7 @@ public final class Utils {
     }
     String[] parts = content.split(" ");
     for (String part : parts) {
-      if (part.toLowerCase().equalsIgnoreCase(word)) {
+      if (part.toLowerCase().contains(word)) {
         return true;
       }
     }
