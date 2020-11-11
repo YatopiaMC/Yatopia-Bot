@@ -1,19 +1,42 @@
 package net.yatopia.bot.mappings;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.jetbrains.annotations.Nullable;
 
 public final class Mapping {
 
   private final BaseMappingType baseType;
   private final MappingType mappingType;
-  private final String obfuscated, intermediate, name, minecraftVersion;
+  private final String obfuscated, intermediate, name, minecraftVersion, obfuscatedDescription;
   private final Mapping parentMapping;
   private final MappingParser constructor;
 
-  private Map<NameType, String> descriptionRemapped = new HashMap<>();
-  private Map<String, String> obfuscatedProperties = new HashMap<>();
+  private LoadingCache<NameType, String> descriptionRemapped =
+      Caffeine.newBuilder()
+          .build(
+              new CacheLoader<NameType, String>() {
+                @Override
+                public String load(NameType nameType) {
+                  if (obfuscatedDescription == null) {
+                    return null;
+                  }
+                  if (baseType == BaseMappingType.SPIGOT) {
+                    // spigot doesn't provide obfuscated descriptions
+                    // or well, we have to parse them ourselves, but they're basically useless
+                    return obfuscatedDescription;
+                  }
+                  if (obfuscatedDescription.contains("(")) {
+                    return SignatureHelper.mapSignature(
+                        nameType, obfuscatedDescription, minecraftVersion, constructor);
+                  } else {
+                    return SignatureHelper.mapType(
+                            nameType, obfuscatedDescription, minecraftVersion, constructor)
+                        .getDescriptor();
+                  }
+                }
+              });
 
   public Mapping(
       BaseMappingType baseType,
@@ -23,6 +46,7 @@ public final class Mapping {
       @Nullable String intermediate,
       String name,
       String minecraftVersion,
+      @Nullable String obfuscatedDescription,
       @Nullable Mapping parentMapping) {
     this.baseType = baseType;
     this.constructor = constructor;
@@ -31,6 +55,7 @@ public final class Mapping {
     this.intermediate = intermediate;
     this.name = name;
     this.minecraftVersion = minecraftVersion;
+    this.obfuscatedDescription = obfuscatedDescription;
     this.parentMapping = parentMapping;
   }
 
@@ -46,13 +71,9 @@ public final class Mapping {
     return mappingType;
   }
 
-  public Map<String, String> getObfuscatedProperties() {
-    return obfuscatedProperties;
-  }
-
   @Nullable
   public String getOwner() {
-    return obfuscatedProperties.get("owner");
+    return parentMapping == null ? null : parentMapping.getObfuscated();
   }
 
   @Nullable
@@ -62,30 +83,12 @@ public final class Mapping {
 
   @Nullable
   public String getDescription() {
-    return obfuscatedProperties.get("description");
+    return obfuscatedDescription;
   }
 
   @Nullable
   public String getDescription(NameType nameType) {
-    return descriptionRemapped.computeIfAbsent(
-        nameType,
-        t -> {
-          String description = getDescription();
-          if (description == null) {
-            return null;
-          }
-          if (baseType == BaseMappingType.SPIGOT) {
-            // spigot doesn't provide obfuscated descriptions
-            // or well, we have to parse them ourselves, but they're basically useless
-            return description;
-          }
-          if (description.contains("(")) {
-            return SignatureHelper.mapSignature(t, description, minecraftVersion, constructor);
-          } else {
-            return SignatureHelper.mapType(t, description, minecraftVersion, constructor)
-                .getDescriptor();
-          }
-        });
+    return descriptionRemapped.get(nameType);
   }
 
   public String getObfuscated() {

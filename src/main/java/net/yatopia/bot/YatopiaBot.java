@@ -5,10 +5,13 @@ import com.mrivanplays.jdcf.builtin.CommandShutdown;
 import com.mrivanplays.jdcf.settings.CommandSettings;
 import com.mrivanplays.jdcf.settings.prefix.ImmutablePrefixHandler;
 import java.awt.Color;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import javax.security.auth.login.LoginException;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -30,6 +33,7 @@ import net.yatopia.bot.listeners.MessageListener;
 import net.yatopia.bot.mappings.MappingParser;
 import net.yatopia.bot.mappings.spigot.SpigotMappingHandler;
 import net.yatopia.bot.mappings.yarn.YarnMappingHandler;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +41,7 @@ public class YatopiaBot {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(YatopiaBot.class);
 
-  public static void main(String[] args) throws LoginException, InterruptedException {
+  public static void main(String[] args) throws LoginException, InterruptedException, IOException {
     ConfigInitializer config = new ConfigInitializer();
     if (!config.shouldStart()) {
       LOGGER.error("Couldn't find token; disabling");
@@ -56,13 +60,29 @@ public class YatopiaBot {
 
   private YatopiaBot(String token) {
     this.token = token;
-    this.executor = Executors.newScheduledThreadPool(4);
+    this.executor =
+        Executors.newScheduledThreadPool(
+            8,
+            new ThreadFactory() {
+              private AtomicInteger count = new AtomicInteger(0);
+
+              @Override
+              public Thread newThread(@NotNull Runnable r) {
+                Thread thread = new Thread(r, "Yatopia-Bot Thread #" + count.getAndIncrement());
+                thread.setDaemon(true);
+                return thread;
+              }
+            });
   }
 
-  public void start() throws LoginException, InterruptedException {
+  public void start() throws LoginException, InterruptedException, IOException {
     JDA jda =
         JDABuilder.create(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS)
             .setToken(token)
+            .setEventPool(executor)
+            .setGatewayPool(executor)
+            .setCallbackPool(executor)
+            .setRateLimitPool(executor)
             .setActivity(Activity.playing("Yatopia.jar"))
             .disableCache(CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
             .addEventListeners(new MessageListener())
@@ -106,9 +126,10 @@ public class YatopiaBot {
     settings.setLogExecutedCommands(true);
 
     CommandManager commandManager = new CommandManager(jda, settings);
-    commandManager.setSettings(settings);
     yarnParser = new YarnMappingHandler();
     spigotParser = new SpigotMappingHandler();
+    yarnParser.preLoadDownloaded();
+    spigotParser.preLoadDownloaded();
     commandManager.registerCommands(
         new CommandJDKSpecific(),
         new CommandDownloadSpecific(),

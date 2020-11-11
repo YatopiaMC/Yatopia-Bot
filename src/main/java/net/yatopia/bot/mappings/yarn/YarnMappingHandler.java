@@ -1,6 +1,7 @@
 package net.yatopia.bot.mappings.yarn;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Expiry;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import java.io.BufferedReader;
 import java.io.File;
@@ -12,11 +13,12 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import net.yatopia.bot.mappings.Mapping;
 import net.yatopia.bot.mappings.MappingParser;
 import net.yatopia.bot.mappings.MappingType;
@@ -28,26 +30,48 @@ import org.apache.commons.io.IOUtils;
 
 public final class YarnMappingHandler implements MappingParser {
 
-  private enum TinyType {
-    V1,
-    V2
-  }
+  private LoadingCache<String, YarnMappingsHolder> mappingCache =
+      Caffeine.newBuilder()
+          .expireAfter(
+              new Expiry<String, YarnMappingsHolder>() {
+                @Override
+                public long expireAfterCreate(
+                    String mcVer, YarnMappingsHolder mappings, long currentTime) {
+                  return mappings == null
+                      ? TimeUnit.MINUTES.toNanos(5)
+                      : (mappings.getTinyType() == TinyType.V1
+                          ? Long.MAX_VALUE
+                          : TimeUnit.HOURS.toNanos(4));
+                }
 
-  private LoadingCache<String, List<Mapping>> mappingCache =
-      Caffeine.newBuilder().expireAfterWrite(Duration.ofHours(4)).build(this::downloadForMcVersion);
+                @Override
+                public long expireAfterUpdate(
+                    String s, YarnMappingsHolder yarnMappingsHolder, long l, long currentDuration) {
+                  return currentDuration;
+                }
+
+                @Override
+                public long expireAfterRead(
+                    String s, YarnMappingsHolder yarnMappingsHolder, long l, long currentDuration) {
+                  return currentDuration;
+                }
+              })
+          .build(this::downloadForMcVersion);
   private Map<String, YarnMappingVersion> currentVersions = new ConcurrentHashMap<>();
 
-  private List<Mapping> downloadForMcVersion(String mcVer) throws IOException {
+  private YarnMappingsHolder downloadForMcVersion(String mcVer) throws IOException {
     File dataFolder = new File(".", "data");
     if (!dataFolder.exists()) {
       dataFolder.mkdirs();
     }
     File mappingsFolder = new File(dataFolder + File.separator + "yarn" + File.separator + mcVer);
-    if (currentVersions.get(mcVer) == null && mappingsFolder.exists()) {
+    YarnMappingVersion current = currentVersions.get(mcVer);
+    if (current == null && mappingsFolder.exists()) {
       File version = new File(mappingsFolder, ".dataversion");
       if (version.exists()) {
         try (BufferedReader reader = new BufferedReader(new FileReader(version))) {
-          currentVersions.put(mcVer, Utils.JSON_MAPPER.readValue(reader, YarnMappingVersion.class));
+          current = Utils.JSON_MAPPER.readValue(reader, YarnMappingVersion.class);
+          currentVersions.put(mcVer, current);
         } catch (IOException e) {
           throw new RuntimeException(e);
         }
@@ -66,7 +90,6 @@ public final class YarnMappingHandler implements MappingParser {
         version = versions[0];
       }
     }
-    YarnMappingVersion current = currentVersions.get(mcVer);
     if (current != null && current.getBuild() == version.getBuild()) {
       TinyType mappingsType = TinyType.V1;
       String[] maven = current.getMaven().split(":");
@@ -84,7 +107,7 @@ public final class YarnMappingHandler implements MappingParser {
       } else {
         mappings = TinyV2Parser.INSTANCE.parse(file, mcVer, this);
       }
-      return mappings;
+      return YarnMappingsHolder.createFor(mappingsType, mappings);
     }
     try {
       String mappingsUrl = version.getMavenUrl("https://maven.fabricmc.net/", "mergedv2", "jar");
@@ -107,7 +130,8 @@ public final class YarnMappingHandler implements MappingParser {
               IOUtils.copy(in, out);
             }
           }
-          return TinyV1Parser.INSTANCE.parse(mappingFile, mcVer, this);
+          return YarnMappingsHolder.createFor(
+              TinyType.V1, TinyV1Parser.INSTANCE.parse(mappingFile, mcVer, this));
         }
       } else {
         // v2 mappings
@@ -124,7 +148,8 @@ public final class YarnMappingHandler implements MappingParser {
         } finally {
           v2Response.close();
         }
-        return TinyV2Parser.INSTANCE.parse(mappingFile, mcVer, this);
+        return YarnMappingsHolder.createFor(
+            TinyType.V1, TinyV2Parser.INSTANCE.parse(mappingFile, mcVer, this));
       }
     } finally {
       File versionFile = new File(mappingsFolder, ".dataversion");
@@ -144,21 +169,64 @@ public final class YarnMappingHandler implements MappingParser {
   }
 
   @Override
+  public void preLoadDownloaded() throws IOException {
+    File dataFolder = new File(".", "data");
+    if (!dataFolder.exists()) {
+      return;
+    }
+    File yarnFolder = new File(dataFolder + File.separator + "yarn");
+    if (!yarnFolder.exists()) {
+      return;
+    }
+    for (File mappingsFolder : yarnFolder.listFiles()) {
+      if (!mappingsFolder.isDirectory()) {
+        continue;
+      }
+      String mcVer = mappingsFolder.getName();
+      File dataVersionFile = new File(mappingsFolder, ".dataversion");
+      if (!dataVersionFile.exists()) {
+        continue;
+      }
+      try (BufferedReader reader = new BufferedReader(new FileReader(dataVersionFile))) {
+        YarnMappingVersion mappingVersion =
+            Utils.JSON_MAPPER.readValue(reader, YarnMappingVersion.class);
+        currentVersions.put(mcVer, mappingVersion);
+        TinyType tinyVersion = TinyType.V1;
+        String[] maven = mappingVersion.getMaven().split(":");
+        String fileName = "yarn-" + maven[2] + "-mergedv2.jar";
+        if (Files.exists(mappingsFolder.toPath().resolve(fileName))) {
+          tinyVersion = TinyType.V2;
+        } else {
+          fileName = "yarn-" + maven[2] + "-tiny.gz";
+        }
+        File mappingsFile = new File(mappingsFolder, fileName);
+        List<Mapping> mappings;
+        if (tinyVersion == TinyType.V1) {
+          mappings = TinyV1Parser.INSTANCE.parse(mappingsFile, mcVer, this);
+        } else {
+          mappings = TinyV2Parser.INSTANCE.parse(mappingsFile, mcVer, this);
+        }
+        mappingCache.put(mcVer, YarnMappingsHolder.createFor(tinyVersion, mappings));
+      }
+    }
+  }
+
+  @Override
   public List<Mapping> parseMapping(MappingType type, String mcVer, String input)
       throws NoSuchVersionException {
-    List<Mapping> mappings = mappingCache.get(mcVer);
+    YarnMappingsHolder mappings = mappingCache.get(mcVer);
     if (mappings == null) {
       throw new NoSuchVersionException(mcVer);
     }
-    return Utils.parseMappings(mappings, type, input);
+    return Utils.parseMappings(mappings.getMappings(), type, input);
   }
 
   @Override
   public List<Mapping> getAllMappings(String mcVer) throws NoSuchVersionException {
-    List<Mapping> mappings = mappingCache.get(mcVer);
+    YarnMappingsHolder mappings = mappingCache.get(mcVer);
     if (mappings == null) {
       throw new NoSuchVersionException(mcVer);
     }
-    return Collections.unmodifiableList(mappings);
+    return Collections.unmodifiableList(mappings.getMappings());
   }
 }

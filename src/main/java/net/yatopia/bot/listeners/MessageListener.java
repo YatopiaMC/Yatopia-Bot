@@ -26,5 +26,15 @@ public class MessageListener extends ListenerAdapter {
                   + " , minecraft is NOT single threaded. There's a DIFFERENCE FROM THE EARTH TO THE MOON between a \"thread\" and a \"core\". Minecraft in MOST OF THE TIMES can take up advantage only of 1 CORE, and that's why cpu clock speed is more important when you're getting a machine for your server.")
           .queue();
     }
+    if (contentRaw.contains("flying squids")
+        || (contentRaw.contains("flying")
+            && (contentRaw.contains("squids") || contentRaw.contains("squid")))) {
+      event
+          .getChannel()
+          .sendMessage(
+              authorMention
+                  + " NO!!!!!! We're only porting patches that make sense from game aspect and performance patches / patches that fix mojira reported bugs. NOTHING ELSE!!!!")
+          .queue();
+    }
   }
 }

@@ -22,51 +22,48 @@ public final class SpigotMappingHandler implements MappingParser {
 
   private Map<String, List<Mapping>> perVersion = new ConcurrentHashMap<>();
 
-  public SpigotMappingHandler() {
+  @Override
+  public void preLoadDownloaded() throws IOException {
     File baseFolder = new File("." + File.separator + "data", "spigot");
     if (!baseFolder.exists()) {
       baseFolder.mkdirs();
     }
     for (SpigotMappingVersion version : SpigotMappingVersion.values()) {
-      try {
-        File mappingsFolder = new File(baseFolder, version.getMcVersion());
-        File classMappingsFile =
-            new File(mappingsFolder, "bukkit-" + version.getMcVersion() + "-cl.csrg");
-        File memberMappingsFile =
-            new File(mappingsFolder, "bukkit-" + version.getMcVersion() + "-members.csrg");
-        if (mappingsFolder.exists()) {
-          perVersion.put(
-              version.getMcVersion(),
-              SpigotMappingParser.parse(
-                  classMappingsFile, memberMappingsFile, version.getMcVersion(), this));
-          continue;
-        }
-        mappingsFolder.mkdirs();
-        classMappingsFile.createNewFile();
-        memberMappingsFile.createNewFile();
-        Call classCall = Utils.newCall(Utils.newRequest(version.getClassMappings()));
-        try (Response response = classCall.execute()) {
-          try (InputStream in = response.body().byteStream()) {
-            try (OutputStream out = new FileOutputStream(classMappingsFile)) {
-              IOUtils.copy(in, out);
-            }
-          }
-        }
-        Call membersCall = Utils.newCall(Utils.newRequest(version.getMemberMappings()));
-        try (Response response = membersCall.execute()) {
-          try (InputStream in = response.body().byteStream()) {
-            try (OutputStream out = new FileOutputStream(memberMappingsFile)) {
-              IOUtils.copy(in, out);
-            }
-          }
-        }
+      File mappingsFolder = new File(baseFolder, version.getMcVersion());
+      File classMappingsFile =
+          new File(mappingsFolder, "bukkit-" + version.getMcVersion() + "-cl.csrg");
+      File memberMappingsFile =
+          new File(mappingsFolder, "bukkit-" + version.getMcVersion() + "-members.csrg");
+      if (mappingsFolder.exists()) {
         perVersion.put(
             version.getMcVersion(),
             SpigotMappingParser.parse(
                 classMappingsFile, memberMappingsFile, version.getMcVersion(), this));
-      } catch (IOException e) {
-        throw new RuntimeException(e);
+        continue;
       }
+      mappingsFolder.mkdirs();
+      classMappingsFile.createNewFile();
+      memberMappingsFile.createNewFile();
+      Call classCall = Utils.newCall(Utils.newRequest(version.getClassMappings()));
+      try (Response response = classCall.execute()) {
+        try (InputStream in = response.body().byteStream()) {
+          try (OutputStream out = new FileOutputStream(classMappingsFile)) {
+            IOUtils.copy(in, out);
+          }
+        }
+      }
+      Call membersCall = Utils.newCall(Utils.newRequest(version.getMemberMappings()));
+      try (Response response = membersCall.execute()) {
+        try (InputStream in = response.body().byteStream()) {
+          try (OutputStream out = new FileOutputStream(memberMappingsFile)) {
+            IOUtils.copy(in, out);
+          }
+        }
+      }
+      perVersion.put(
+          version.getMcVersion(),
+          SpigotMappingParser.parse(
+              classMappingsFile, memberMappingsFile, version.getMcVersion(), this));
     }
   }
 

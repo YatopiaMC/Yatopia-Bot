@@ -56,13 +56,17 @@ public class TinyV1Parser {
 
     List<Mapping> ret = new ArrayList<>();
     for (String line : lines) {
-      ret.add(fromString(line, order, minecraftVersion, constructor));
+      ret.add(fromString(ret, line, order, minecraftVersion, constructor));
     }
     return ret;
   }
 
   private Mapping fromString(
-      String line, List<Integer> order, String minecraftVersion, MappingParser constructor) {
+      List<Mapping> currentMappings,
+      String line,
+      List<Integer> order,
+      String minecraftVersion,
+      MappingParser constructor) {
     String[] info = line.split("\t");
     MappingType type = MappingType.valueOf(info[0]);
     switch (type) {
@@ -77,24 +81,33 @@ public class TinyV1Parser {
             intermediate,
             name,
             minecraftVersion,
+            null,
             null);
       case METHOD:
       case FIELD:
         intermediate = info[order.get(1) + 2];
         name = info[order.get(2) + 2];
-        Mapping mapping =
-            new Mapping(
-                BaseMappingType.YARN,
-                constructor,
-                type,
-                info[order.get(0) + 2],
-                intermediate,
-                name,
-                minecraftVersion,
-                null);
-        mapping.getObfuscatedProperties().put("owner", info[1]);
-        mapping.getObfuscatedProperties().put("description", info[2]);
-        return mapping;
+        String obfuscatedOwner = info[1];
+        Mapping parent = null;
+        for (Mapping current : currentMappings) {
+          if (current.getMappingType() != MappingType.CLASS){
+            continue;
+          }
+          if (current.getObfuscated().equalsIgnoreCase(obfuscatedOwner)) {
+            parent = current;
+            break;
+          }
+        }
+        return new Mapping(
+            BaseMappingType.YARN,
+            constructor,
+            type,
+            info[order.get(0) + 2],
+            intermediate,
+            name,
+            minecraftVersion,
+            info[2],
+            parent);
       default:
         throw new IllegalArgumentException("Unknown type");
     }

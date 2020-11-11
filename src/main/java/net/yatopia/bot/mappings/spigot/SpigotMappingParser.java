@@ -39,6 +39,7 @@ public final class SpigotMappingParser {
                 null,
                 "net/minecraft/server/" + values[1],
                 mcVer,
+                null,
                 null));
       }
     }
@@ -68,15 +69,17 @@ public final class SpigotMappingParser {
           }
         }
 
-        MappingType type = description != null ? MappingType.METHOD : MappingType.FIELD;
-        Mapping mapping =
+        ret.add(
             new Mapping(
-                BaseMappingType.SPIGOT, parser, type, obfuscatedName, null, name, mcVer, parent);
-        mapping
-            .getObfuscatedProperties()
-            .put("owner", parent != null ? parent.getObfuscated() : null);
-        mapping.getObfuscatedProperties().put("description", description);
-        ret.add(mapping);
+                BaseMappingType.SPIGOT,
+                parser,
+                description != null ? MappingType.METHOD : MappingType.FIELD,
+                obfuscatedName,
+                null,
+                name,
+                mcVer,
+                description,
+                parent));
       }
     }
     return ret;

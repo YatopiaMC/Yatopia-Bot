@@ -45,19 +45,14 @@ public class TinyV2Parser {
     private final MappingType type;
     private final String minecraftVersion;
     private final MappingParser constructor;
+    private String original, intermediate, name, description;
+    private PartialMapping parent;
 
     public PartialMapping(MappingType type, String minecraftVersion, MappingParser constructor) {
       this.type = type;
       this.minecraftVersion = minecraftVersion;
       this.constructor = constructor;
     }
-
-    private String original;
-    private String intermediate;
-    private String name;
-    private String owner;
-    private String description;
-    private PartialMapping parent;
 
     public MappingType type() {
       return type;
@@ -85,7 +80,6 @@ public class TinyV2Parser {
 
     public PartialMapping parent(PartialMapping parent) {
       this.parent = parent;
-      this.owner = parent.original;
       return this;
     }
 
@@ -114,19 +108,16 @@ public class TinyV2Parser {
       if (this.parent != null) {
         parent = this.parent.bake();
       }
-      Mapping mapping =
-          new Mapping(
-              BaseMappingType.YARN,
-              constructor,
-              type,
-              original,
-              intermediate,
-              name,
-              minecraftVersion,
-              parent);
-      mapping.getObfuscatedProperties().put("owner", owner);
-      mapping.getObfuscatedProperties().put("description", description);
-      return mapping;
+      return new Mapping(
+          BaseMappingType.YARN,
+          constructor,
+          type,
+          original,
+          intermediate,
+          name,
+          minecraftVersion,
+          description,
+          parent);
     }
   }
 
