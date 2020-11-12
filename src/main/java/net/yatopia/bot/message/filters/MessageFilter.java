@@ -58,8 +58,21 @@ public interface MessageFilter {
         return true;
       }
     }
-    // all good
-    return false;
+
+    // check the rest of the word ( in case we didn't find a word already and
+    // stringReader.canRead(wordLength) is false )
+    int vl = 0;
+    int charsRead = 0;
+    while (stringReader.canRead()) {
+      char c = stringReader.readNextChar();
+      for (char wordSeqC : wordSequence) {
+        if (c == wordSeqC) {
+          vl++;
+        }
+      }
+      charsRead++;
+    }
+    return vl >= charsRead; // intellij forced me to do this 
   }
 
   default boolean applyEffectiveFilter(
@@ -146,6 +159,7 @@ public interface MessageFilter {
         return true;
       }
     }
+    // all good
     return false;
   }
 }

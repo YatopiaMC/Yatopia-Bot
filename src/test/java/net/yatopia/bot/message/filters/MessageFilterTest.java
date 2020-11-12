@@ -34,6 +34,21 @@ public class MessageFilterTest {
   }
 
   @Test
+  public void testDepth1Word() {
+    assertTrue(DummyMessageFilter.getInstance().applyEffectiveFilter("linux, h e l l o", "hello"));
+  }
+
+  @Test
+  public void testMoreDepth1Word() {
+    assertTrue(DummyMessageFilter.getInstance().applyEffectiveFilter("h e l l o w o r l d", "hello"));
+  }
+
+  @Test
+  public void testAt2ndPlaceDepth1Word() {
+    assertTrue(DummyMessageFilter.getInstance().applyEffectiveFilter("w o r l d h e l l o", "hello"));
+  }
+
+  @Test
   public void testMultipleWordsFilterMessage1WordInput() {
     assertFalse(
         DummyMessageFilter.getInstance()
