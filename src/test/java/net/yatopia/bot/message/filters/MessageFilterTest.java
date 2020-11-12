@@ -29,6 +29,11 @@ public class MessageFilterTest {
   }
 
   @Test
+  public void testWithOtherCharacter() {
+    assertTrue(DummyMessageFilter.getInstance().applyEffectiveFilter("hellosh linux!", "hello"));
+  }
+
+  @Test
   public void testMultipleWordsFilterMessage1WordInput() {
     assertFalse(
         DummyMessageFilter.getInstance()
@@ -60,10 +65,18 @@ public class MessageFilterTest {
   }
 
   @Test
-  public void testProperlyWorking() {
+  public void testIntendedWork() {
     assertTrue(
         DummyMessageFilter.getInstance()
             .applyEffectiveFilter(
                 "squids that fly", 2, Arrays.asList("flying", "fly", "squids", "squid")));
+  }
+
+  @Test
+  public void testAllSeparatedBySpaces() {
+    assertTrue(
+        DummyMessageFilter.getInstance()
+            .applyEffectiveFilter(
+                "f l y i n g s q u i d s", 2, Arrays.asList("flying", "fly", "squids", "squid")));
   }
 }

@@ -128,6 +128,20 @@ public interface MessageFilter {
           charMatches++;
         }
       }
+      // at this point, stringReader.canRead(wordLength) is false
+      // we're just gonna check the rest of the string
+      int matches = 0;
+      while (stringReader.canRead()) {
+        char c = stringReader.readNextChar();
+        for (char wC : wSequence) {
+          if (wC == c) {
+            matches++;
+          }
+        }
+      }
+      if (matches >= wordLength) {
+        charMatches++;
+      }
       if (charMatches == threshold) {
         return true;
       }

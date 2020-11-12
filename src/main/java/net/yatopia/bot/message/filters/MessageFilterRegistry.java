@@ -16,7 +16,6 @@ public final class MessageFilterRegistry {
 
   private MessageFilterRegistry() {
     registerFilter(new YapfaFilter());
-    registerFilter(new AsciiCyrillicCharactersFilter());
     registerFilter(new FlyingSquidsFilter());
   }
 
