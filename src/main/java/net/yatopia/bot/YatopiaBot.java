@@ -84,7 +84,7 @@ public class YatopiaBot {
             .setRateLimitPool(executor)
             .setActivity(Activity.playing("Yatopia.jar"))
             .disableCache(CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
-            .addEventListeners(new MessageListener())
+            //.addEventListeners(new MessageListener())
             .build()
             .awaitReady();
 

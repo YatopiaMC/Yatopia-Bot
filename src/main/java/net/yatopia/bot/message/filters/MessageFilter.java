@@ -59,20 +59,21 @@ public interface MessageFilter {
       }
     }
 
-    // check the rest of the word ( in case we didn't find a word already and
-    // stringReader.canRead(wordLength) is false )
-    int vl = 0;
-    int charsRead = 0;
-    while (stringReader.canRead()) {
-      char c = stringReader.readNextChar();
-      for (char wordSeqC : wordSequence) {
-        if (c == wordSeqC) {
-          vl++;
-        }
-      }
-      charsRead++;
-    }
-    return vl >= charsRead; // intellij forced me to do this 
+//    // check the rest of the word ( in case we didn't find a word already and
+//    // stringReader.canRead(wordLength) is false )
+//    int vl = 0;
+//    int charsRead = 0;
+//    while (stringReader.canRead()) {
+//      char c = stringReader.readNextChar();
+//      for (char wordSeqC : wordSequence) {
+//        if (c == wordSeqC) {
+//          vl++;
+//        }
+//      }
+//      charsRead++;
+//    }
+//    return vl >= charsRead; // intellij forced me to do this
+    return false;
   }
 
   default boolean applyEffectiveFilter(

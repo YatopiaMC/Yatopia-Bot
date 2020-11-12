@@ -15,8 +15,8 @@ public final class MessageFilterRegistry {
   }
 
   private MessageFilterRegistry() {
-    registerFilter(new YapfaFilter());
-    registerFilter(new FlyingSquidsFilter());
+//    registerFilter(new YapfaFilter());
+//    registerFilter(new FlyingSquidsFilter());
   }
 
   private List<MessageFilter> filters = new ArrayList<>();
