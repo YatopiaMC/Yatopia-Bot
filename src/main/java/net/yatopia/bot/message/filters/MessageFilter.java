@@ -77,6 +77,7 @@ public interface MessageFilter {
 
   default boolean applyEffectiveFilter(
       String messageContent, int threshold, List<String> wordSequence) {
+    // todo: fix this shit
     if (messageContent.isEmpty()) {
       return false;
     }

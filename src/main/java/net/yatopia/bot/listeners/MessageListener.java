@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.yatopia.bot.message.filters.FilterContext;
+import net.yatopia.bot.message.filters.FilterTriggers;
 import net.yatopia.bot.message.filters.MessageFilterRegistry;
 
 public class MessageListener extends ListenerAdapter {
@@ -27,5 +28,10 @@ public class MessageListener extends ListenerAdapter {
     }
     MessageFilterRegistry.getInstance()
         .applyFilters(FilterContext.create(message, responseChannel));
+    if (FilterTriggers.hasReachedTriggerThreshold(message.getAuthor().getIdLong())) {
+      if (message.getMember() != null) {
+        message.getMember().kick().queue();
+      }
+    }
   }
 }

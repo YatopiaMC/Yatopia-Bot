@@ -40,12 +40,14 @@ public class MessageFilterTest {
 
   @Test
   public void testMoreDepth1Word() {
-    assertTrue(DummyMessageFilter.getInstance().applyEffectiveFilter("h e l l o w o r l d", "hello"));
+    assertTrue(
+        DummyMessageFilter.getInstance().applyEffectiveFilter("h e l l o w o r l d", "hello"));
   }
 
   @Test
   public void testAt2ndPlaceDepth1Word() {
-    assertTrue(DummyMessageFilter.getInstance().applyEffectiveFilter("w o r l d h e l l o", "hello"));
+    assertTrue(
+        DummyMessageFilter.getInstance().applyEffectiveFilter("w o r l d h e l l o", "hello"));
   }
 
   @Test
@@ -94,4 +96,13 @@ public class MessageFilterTest {
             .applyEffectiveFilter(
                 "f l y i n g s q u i d s", 2, Arrays.asList("flying", "fly", "squids", "squid")));
   }
+
+  // @Test
+  //  public void testMultipleWords() {
+  //    assertFalse(
+  //        DummyMessageFilter.getInstance()
+  //            .applyEffectiveFilter(
+  //                "squids that go squidding", 2, Arrays.asList("flying", "fly", "squids",
+  // "squid")));
+  //  }
 }
