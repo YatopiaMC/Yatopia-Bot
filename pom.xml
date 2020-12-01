@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>net.yatopia</groupId>
+  <groupId>org.yatopiamc</groupId>
   <artifactId>yatopia-bot</artifactId>
   <version>1.0-SNAPSHOT</version>
 
@@ -56,7 +56,7 @@
           <transformers>
             <transformer
               implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-              <mainClass>net.yatopia.bot.YatopiaBot</mainClass>
+              <mainClass>org.yatopiamc.bot.YatopiaBot</mainClass>
             </transformer>
           </transformers>
           <createDependencyReducedPom>false</createDependencyReducedPom>
