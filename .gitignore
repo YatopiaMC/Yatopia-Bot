@@ -131,3 +131,6 @@ dmypy.json
 # JetBrains IDEs specific
 *.iml
 .idea/
+
+# Yatopia-Bot specific
+data/

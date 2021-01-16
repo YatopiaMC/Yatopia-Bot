@@ -62,7 +62,7 @@ public class YatopiaBot {
     this.token = token;
     this.executor =
         Executors.newScheduledThreadPool(
-            8,
+            12,
             new ThreadFactory() {
               private AtomicInteger count = new AtomicInteger(0);
 
