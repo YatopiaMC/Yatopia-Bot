@@ -7,8 +7,8 @@ import com.mrivanplays.jdcf.data.CommandAliases;
 import com.mrivanplays.jdcf.data.CommandDescription;
 import com.mrivanplays.jdcf.data.CommandUsage;
 import net.dv8tion.jda.api.entities.MessageChannel;
-import org.yatopiamc.bot.EmbedUtil;
 import org.jetbrains.annotations.NotNull;
+import org.yatopiamc.bot.EmbedUtil;
 
 @CommandAliases("jdk|flags|openj9|jvm|graalvm")
 @CommandDescription("JDK specific commands")
@@ -36,8 +36,15 @@ public class CommandJDKSpecific extends Command {
                 EmbedUtil.withAuthor(context.getAuthor()).setDescription(descriptionFlags).build())
             .queue();
         break;
-      case "openj9":
       case "jvm":
+        channel
+            .sendMessage(
+                EmbedUtil.withAuthor(context.getAuthor())
+                    .setDescription("We recommend using HotSpot JVM.")
+                    .build())
+            .queue();
+        break;
+      case "openj9":
       case "graalvm":
         String descriptionVm =
             "Due to the lack of information and benchmarks (evidence) that can prove "
