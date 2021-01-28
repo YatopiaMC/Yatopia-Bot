@@ -22,7 +22,7 @@ public class CommandJDKSpecific extends Command {
     switch (alias) {
       case "jdk":
         String descriptionJdk =
-            "Our advice on JDK is to use the latest LTS (Long Term Support) version, currently jdk 11";
+            "Our advice on JDK is to use the latest LTS (Long Term Support) version, currently JDK 11";
         channel
             .sendMessage(
                 EmbedUtil.withAuthor(context.getAuthor()).setDescription(descriptionJdk).build())
@@ -30,31 +30,31 @@ public class CommandJDKSpecific extends Command {
         break;
       case "flags":
         String descriptionFlags =
-            "We recommend using aikar's flags since there's no evidence that other flags (with other VMs) work better than aikar's. Of course, you're free to use and do whatever you want. https://mcflags.emc.gs/";
+            "We recommend using Aikar's flags since there's no evidence that other flags (with other VMs) work better than Aikar's. Of course, you're free to use and do whatever you want. https://mcflags.emc.gs/";
         channel
             .sendMessage(
                 EmbedUtil.withAuthor(context.getAuthor()).setDescription(descriptionFlags).build())
             .queue();
         break;
       case "jvm":
-        channel
+      case "openj9":
+      case "graalvm"
+              channel
             .sendMessage(
                 EmbedUtil.withAuthor(context.getAuthor())
-                    .setDescription("We recommend using HotSpot JVM.")
+                    .setDescription("We recommend using GraalVM or HotSpot JVM. GraalVM is known to have better performance than HotSpot JVM. Of course, you're free to use and do whatever you want.")
                     .build())
             .queue();
-        break;
-      case "openj9":
-      case "graalvm":
-        String descriptionVm =
-            "Due to the lack of information and benchmarks (evidence) that can prove "
-                + alias
-                + " is better than HotSpot, our 2 cents here are to use HotSpot, since its the official JVM, developed by Oracle themselves. By no means this should mean to not use other VMs, you are free to do whatever you want.";
-        channel
-            .sendMessage(
-                EmbedUtil.withAuthor(context.getAuthor()).setDescription(descriptionVm).build())
-            .queue();
-        break;
+        break;:
+        // String descriptionVm =
+        //     "Due to the lack of information and benchmarks (evidence) that can prove "
+        //         + alias
+        //         + " is better than HotSpot, our 2 cents here are to use HotSpot, since its the official JVM, developed by Oracle themselves. By no means this should mean to not use other VMs, you are free to do whatever you want.";
+        // channel
+        //     .sendMessage(
+        //         EmbedUtil.withAuthor(context.getAuthor()).setDescription(descriptionVm).build())
+        //     .queue();
+        // break;
     }
     return true;
   }
