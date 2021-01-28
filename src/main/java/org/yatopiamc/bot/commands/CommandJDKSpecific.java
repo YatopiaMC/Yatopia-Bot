@@ -38,14 +38,14 @@ public class CommandJDKSpecific extends Command {
         break;
       case "jvm":
       case "openj9":
-      case "graalvm"
+      case "graalvm":
               channel
             .sendMessage(
                 EmbedUtil.withAuthor(context.getAuthor())
                     .setDescription("We recommend using GraalVM or HotSpot JVM. GraalVM is known to have better performance than HotSpot JVM. Of course, you're free to use and do whatever you want.")
                     .build())
             .queue();
-        break;:
+        break;
         // String descriptionVm =
         //     "Due to the lack of information and benchmarks (evidence) that can prove "
         //         + alias

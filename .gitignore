@@ -134,3 +134,6 @@ dmypy.json
 
 # Yatopia-Bot specific
 data/
+
+.gradle/**
+build/**
