@@ -30,6 +30,7 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.7.25")
     implementation("org.apache.httpcomponents.client5:httpclient5:5.0.3")
     implementation("com.google.code.gson:gson:2.8.6")
+    implementation("com.google.guava:guava:30.1-jre")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.5.2")
     testImplementation("org.junit.platform:junit-platform-runner:1.5.2")
 }

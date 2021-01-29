@@ -1,7 +1,9 @@
 package org.yatopiamc.bot.timings;
 
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -36,7 +38,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TimingsMessageListener extends ListenerAdapter {
@@ -44,6 +45,7 @@ public class TimingsMessageListener extends ListenerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimingsMessageListener.class);
     private static final Pattern VERSION = Pattern.compile("\\d+\\.\\d+\\.\\d+");
 
+    private final LoadingCache<String, CompletableFuture<SimpleHttpResponse>> loadingCache;
     private final CloseableHttpAsyncClient httpAsyncClient;
     private final PoolingAsyncClientConnectionManager connectionManager;
 
@@ -86,6 +88,16 @@ public class TimingsMessageListener extends ListenerAdapter {
             httpAsyncClient.close(CloseMode.GRACEFUL);
             connectionManager.close(CloseMode.GRACEFUL);
         }));
+        loadingCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(30, TimeUnit.MINUTES)
+                .softValues()
+                .concurrencyLevel(4)
+                .build(new CacheLoader<String, CompletableFuture<SimpleHttpResponse>>() {
+                    @Override
+                    public CompletableFuture<SimpleHttpResponse> load(String key) {
+                        return execute(SimpleHttpRequests.get(key));
+                    }
+                });
     }
 
     @Override
@@ -114,13 +126,16 @@ public class TimingsMessageListener extends ListenerAdapter {
         final String timingsHost = parts[0];
         final String timingsId = parts[1];
         final CompletableFuture<Message> inProgress = inProgress(message);
-        final CompletableFuture<SimpleHttpResponse> timingsJsonRequest = execute(SimpleHttpRequests.get(timingsHost + "data.php?id=" + timingsId));
+        final CompletableFuture<SimpleHttpResponse> timingsJsonRequest = loadingCache.getUnchecked(timingsHost + "data.php?id=" + timingsId);
         final EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Timings Analysis", url);
         timingsJsonRequest.handle((response, throwable) -> {
+            boolean hasError = false;
             long startProcessingTime = System.currentTimeMillis();
             try {
                 if (response == null) {
+                    loadingCache.asMap().remove(timingsHost + "data.php?id=" + timingsId);
+                    hasError = true;
                     final RuntimeException exception = new RuntimeException(throwable);
                     LOGGER.warn("An unexpected error occurred while processing this request", exception);
                     embedBuilder.setTitle("An unexpected error occurred while processing this request");
@@ -137,13 +152,15 @@ public class TimingsMessageListener extends ListenerAdapter {
                 }
                 return null;
             } catch (Throwable t) {
+                loadingCache.asMap().remove(timingsHost + "data.php?id=" + timingsId);
+                hasError = true;
                 final RuntimeException exception = new RuntimeException(t);
                 LOGGER.warn("An unexpected error occurred while processing this request", exception);
                 embedBuilder.setTitle("An unexpected error occurred while processing this request");
                 embedBuilder.appendDescription(exception.toString());
                 return null;
             } finally {
-                if(embedBuilder.getFields().isEmpty()) {
+                if(embedBuilder.getFields().isEmpty() && !hasError) {
                     embedBuilder.addField("All good", "Analyzed with no issues", true);
                 }
                 embedBuilder.setFooter(String.format("Timing: %dms network, %dms processing", startProcessingTime - startTime, System.currentTimeMillis() - startProcessingTime));
@@ -255,6 +272,7 @@ public class TimingsMessageListener extends ListenerAdapter {
     }
 
     private CompletableFuture<SimpleHttpResponse> execute(SimpleHttpRequest request) {
+        LOGGER.info("Queuing request for " + request.getRequestUri());
         CompletableFuture<SimpleHttpResponse> future = new CompletableFuture<>();
         try {
             httpAsyncClient.execute(request, new FutureCallback<SimpleHttpResponse>() {
