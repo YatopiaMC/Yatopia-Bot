@@ -87,7 +87,6 @@ public class YatopiaBot {
             .setActivity(Activity.playing("Yatopia.jar"))
             .disableCache(CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
             .addEventListeners(timingsMessageListener)
-            //.addEventListeners(new MessageListener())
             .build()
             .awaitReady();
 
