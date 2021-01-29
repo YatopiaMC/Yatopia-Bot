@@ -36,6 +36,7 @@ import org.yatopiamc.bot.mappings.yarn.YarnMappingHandler;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yatopiamc.bot.timings.TimingsMessageListener;
 
 public class YatopiaBot {
 
@@ -84,6 +85,7 @@ public class YatopiaBot {
             .setRateLimitPool(executor)
             .setActivity(Activity.playing("Yatopia.jar"))
             .disableCache(CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
+            .addEventListeners(new TimingsMessageListener())
             //.addEventListeners(new MessageListener())
             .build()
             .awaitReady();
