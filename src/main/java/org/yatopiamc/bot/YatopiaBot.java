@@ -41,6 +41,7 @@ import org.yatopiamc.bot.timings.TimingsMessageListener;
 public class YatopiaBot {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(YatopiaBot.class);
+  private final TimingsMessageListener timingsMessageListener = new TimingsMessageListener();
 
   public static void main(String[] args) throws LoginException, InterruptedException, IOException {
     ConfigInitializer config = new ConfigInitializer();
@@ -85,7 +86,7 @@ public class YatopiaBot {
             .setRateLimitPool(executor)
             .setActivity(Activity.playing("Yatopia.jar"))
             .disableCache(CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
-            .addEventListeners(new TimingsMessageListener())
+            .addEventListeners(timingsMessageListener)
             //.addEventListeners(new MessageListener())
             .build()
             .awaitReady();
@@ -163,6 +164,15 @@ public class YatopiaBot {
         15,
         15,
         TimeUnit.SECONDS);
+    jda.awaitStatus(JDA.Status.CONNECTED);
     LOGGER.info("Online");
+    Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+      timingsMessageListener.close();
+      jda.shutdown();
+      try {
+        jda.awaitStatus(JDA.Status.DISCONNECTED);
+      } catch (InterruptedException ignored) {
+      }
+    }));
   }
 }

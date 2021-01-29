@@ -27,6 +27,8 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -40,7 +42,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public class TimingsMessageListener extends ListenerAdapter {
+public class TimingsMessageListener extends ListenerAdapter implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TimingsMessageListener.class);
     private static final Pattern VERSION = Pattern.compile("\\d+\\.\\d+\\.\\d+");
@@ -84,10 +86,6 @@ public class TimingsMessageListener extends ListenerAdapter {
                 )
                 .build();
         httpAsyncClient.start();
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            httpAsyncClient.close(CloseMode.GRACEFUL);
-            connectionManager.close(CloseMode.GRACEFUL);
-        }));
         loadingCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(30, TimeUnit.MINUTES)
                 .softValues()
@@ -303,4 +301,13 @@ public class TimingsMessageListener extends ListenerAdapter {
         return future;
     }
 
+    @Override
+    public void close() {
+        httpAsyncClient.close(CloseMode.GRACEFUL);
+        connectionManager.close(CloseMode.GRACEFUL);
+        try {
+            httpAsyncClient.awaitShutdown(TimeValue.MAX_VALUE);
+        } catch (InterruptedException ignored) {
+        }
+    }
 }
