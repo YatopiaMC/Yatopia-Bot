@@ -1,6 +1,7 @@
 package org.yatopiamc.bot.timings;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -35,6 +36,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TimingsMessageListener extends ListenerAdapter {
 
@@ -115,6 +118,7 @@ public class TimingsMessageListener extends ListenerAdapter {
         final EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Timings Analysis", url);
         timingsJsonRequest.handle((response, throwable) -> {
+            long startProcessingTime = System.currentTimeMillis();
             try {
                 if (response == null) {
                     final RuntimeException exception = new RuntimeException(throwable);
@@ -127,10 +131,9 @@ public class TimingsMessageListener extends ListenerAdapter {
                 if (jsonObject.has("timingsMaster")) {
                     final JsonObject timingsMaster = jsonObject.getAsJsonObject("timingsMaster");
                     checkMinecraftVersion(embedBuilder, timingsMaster);
-                    final JsonObject system = timingsMaster.getAsJsonObject("system");
-                    checkTimingCost(embedBuilder, system);
-                    checkJvmVersion(embedBuilder, system);
-                    checkJvmFlags(embedBuilder, system);
+                    checkSystem(embedBuilder, timingsMaster);
+                    checkDataPacks(embedBuilder, timingsMaster);
+                    checkPlugins(embedBuilder, timingsMaster);
                 }
                 return null;
             } catch (Throwable t) {
@@ -143,7 +146,7 @@ public class TimingsMessageListener extends ListenerAdapter {
                 if(embedBuilder.getFields().isEmpty()) {
                     embedBuilder.addField("All good", "Analyzed with no issues", true);
                 }
-                embedBuilder.setFooter("Processed in " + (System.currentTimeMillis() - startTime) + "ms");
+                embedBuilder.setFooter(String.format("Timing: %dms network, %dms processing", startProcessingTime - startTime, System.currentTimeMillis() - startProcessingTime));
                 inProgress.handle((msg, t) -> {
                     if(msg != null) {
                         msg.editMessage(embedBuilder.build()).queue();
@@ -155,6 +158,43 @@ public class TimingsMessageListener extends ListenerAdapter {
                 });
             }
         });
+    }
+
+    private void checkPlugins(EmbedBuilder embedBuilder, JsonObject timingsMaster) {
+        final JsonObject plugins = timingsMaster.getAsJsonObject("plugins");
+        final JsonObject configs = timingsMaster.getAsJsonObject("config");
+        TimingsSuggestions.SERVER_PLUGIN_SUGGESTIONS.entrySet().stream().flatMap(entry -> {
+            if(configs.has(entry.getKey()))
+                return entry.getValue().suggestions.entrySet().stream();
+            return Stream.empty();
+        }).filter(entry -> plugins.has(entry.getKey())).forEach(entry -> {
+            embedBuilder.addField(String.format("%s %s", entry.getKey(), entry.getValue().prefix), entry.getValue().warning, true);
+        });
+    }
+
+    private void checkDataPacks(EmbedBuilder embedBuilder, JsonObject timingsMaster) {
+        final JsonObject handlerMap = timingsMaster.getAsJsonObject("idmap").getAsJsonObject("handlerMap");
+        handlerMap.entrySet().stream().filter(entry -> {
+            final String name = entry.getValue().getAsJsonObject().get("name").getAsString();
+            return name.startsWith("Command Function - ") && name.endsWith(":tick");
+        }).forEach(entry -> {
+            final String name = entry.getValue().getAsJsonObject().get("name").getAsString().substring("Command Function - ".length()).split(":tick")[0];
+            embedBuilder.addField(name, "This datapack uses command functions which are laggy.", true);
+        });
+    }
+
+    private void checkSystem(EmbedBuilder embedBuilder, JsonObject timingsMaster) {
+        final JsonObject system = timingsMaster.getAsJsonObject("system");
+        checkTimingCost(embedBuilder, system);
+        checkJvmVersion(embedBuilder, system);
+        checkJvmFlags(embedBuilder, system);
+        checkCPU(embedBuilder, system);
+    }
+
+    private void checkCPU(EmbedBuilder embedBuilder, JsonObject system) {
+        final int cpu = system.get("cpu").getAsInt();
+        if(cpu < 4)
+            embedBuilder.addField("CPU Threads", String.format("You have only %d thread(s). Find a better host", cpu), true);
     }
 
     private void checkJvmFlags(EmbedBuilder embedBuilder, JsonObject system) {
