@@ -13,29 +13,17 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequests;
 import org.apache.hc.client5.http.async.methods.SimpleHttpResponse;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.async.CloseableHttpAsyncClient;
-import org.apache.hc.client5.http.impl.async.HttpAsyncClients;
-import org.apache.hc.client5.http.impl.nio.PoolingAsyncClientConnectionManager;
 import org.apache.hc.core5.concurrent.FutureCallback;
-import org.apache.hc.core5.http.HeaderElement;
-import org.apache.hc.core5.http.impl.DefaultConnectionReuseStrategy;
-import org.apache.hc.core5.http.message.BasicHeaderElementIterator;
-import org.apache.hc.core5.io.CloseMode;
-import org.apache.hc.core5.reactor.IOReactorConfig;
-import org.apache.hc.core5.util.TimeValue;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.yatopiamc.bot.util.NetworkUtils;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
@@ -45,50 +33,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public class TimingsMessageListener extends ListenerAdapter implements Closeable {
+public class TimingsMessageListener extends ListenerAdapter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TimingsMessageListener.class);
     private static final Pattern VERSION = Pattern.compile("\\d+\\.\\d+\\.\\d+");
 
     private final LoadingCache<String, CompletableFuture<SimpleHttpResponse>> loadingCache;
-    private final CloseableHttpAsyncClient httpAsyncClient;
-    private final PoolingAsyncClientConnectionManager connectionManager;
 
     {
-        connectionManager = new PoolingAsyncClientConnectionManager();
-        connectionManager.setMaxTotal(16);
-        connectionManager.setDefaultMaxPerRoute(8);
-        httpAsyncClient = HttpAsyncClients.custom()
-                .setConnectionReuseStrategy(new DefaultConnectionReuseStrategy())
-                .setKeepAliveStrategy((response, context) -> {
-                    BasicHeaderElementIterator it = new BasicHeaderElementIterator(
-                            response.headerIterator("connection"));
-                    while (it.hasNext()) {
-                        HeaderElement he = it.next();
-                        String param = he.getName();
-                        String value = he.getValue();
-                        if (value != null && param.equalsIgnoreCase("timeout")) {
-                            return TimeValue.ofSeconds(Long.parseLong(value));
-                        }
-                    }
-                    return TimeValue.ofSeconds(60);
-                })
-                .setDefaultRequestConfig(RequestConfig.custom()
-                        .setConnectTimeout(10, TimeUnit.SECONDS)
-                        .setResponseTimeout(10, TimeUnit.SECONDS)
-                        .setConnectionRequestTimeout(10, TimeUnit.SECONDS)
-                        .build()
-                )
-                .setConnectionManager(connectionManager)
-                .setIOReactorConfig(IOReactorConfig.custom()
-                        .setSoKeepAlive(true)
-                        .setSoReuseAddress(true)
-                        .setTcpNoDelay(true)
-                        .setSoTimeout(10, TimeUnit.SECONDS)
-                        .build()
-                )
-                .build();
-        httpAsyncClient.start();
         loadingCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(30, TimeUnit.MINUTES)
                 .softValues()
@@ -96,7 +48,7 @@ public class TimingsMessageListener extends ListenerAdapter implements Closeable
                 .build(new CacheLoader<String, CompletableFuture<SimpleHttpResponse>>() {
                     @Override
                     public CompletableFuture<SimpleHttpResponse> load(String key) {
-                        return execute(SimpleHttpRequests.get(key));
+                        return NetworkUtils.execute(SimpleHttpRequests.get(key));
                     }
                 });
     }
@@ -272,14 +224,14 @@ public class TimingsMessageListener extends ListenerAdapter implements Closeable
                 String[] flagList = jvmFlags.split(" ");
                 final Optional<String> maxMemString = Arrays.stream(flagList).filter(f -> f.startsWith("-Xmx")).findFirst();
                 maxMemString.ifPresent(s -> {
-                    int maxHeapMegabytes = Integer.parseInt(s.substring("-Xmx".length()).replace("G", "000").replace("g", "000").replace("M", "").replace("m", ""));
-                    if (maxHeapMegabytes < 5400)
+                    long maxHeapBytes = parseMemory(s.substring("-Xmx".length()));
+                    if (maxHeapBytes < 5_400L * 1024 * 1024)
                         embedBuilder.addField("Low Memory", "Allocate at least 6-10GB of ram to your server if you can afford it.", true);
 
                     final Optional<String> minMemString = Arrays.stream(flagList).filter(f -> f.startsWith("-Xms")).findFirst();
                     minMemString.ifPresent(s1 -> {
-                        int minHeapMegabytes = Integer.parseInt(s1.substring("-Xms".length()).replace("G", "000").replace("g", "000").replace("M", "").replace("m", ""));
-                        if (minHeapMegabytes != maxHeapMegabytes)
+                        long minHeapMegabytes = parseMemory(s1.substring("-Xms".length()));
+                        if (minHeapMegabytes != maxHeapBytes)
                             embedBuilder.addField("Outdated JVM Flags", "Your Xmx and Xms values should be equivalent when using Aikar's flags.", true);
                     });
                 });
@@ -289,6 +241,21 @@ public class TimingsMessageListener extends ListenerAdapter implements Closeable
         } else {
             embedBuilder.addField("Use Aikar's Flags", "Use [Aikar's flags](https://aikar.co/2018/07/02/tuning-the-jvm-g1gc-garbage-collector-flags-for-minecraft/).", true);
         }
+    }
+
+    private long parseMemory(String str) {
+        long memBytes;
+        try {
+            memBytes = Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            final long number = Long.parseLong(str.substring(0, str.length() - 1));
+            if (str.endsWith("k") || str.endsWith("K")) memBytes = number * 1024;
+            else if (str.endsWith("m") || str.endsWith("M")) memBytes = number * 1024 * 1024;
+            else if (str.endsWith("g") || str.endsWith("G")) memBytes = number * 1024 * 1024 * 1024;
+            else if (str.endsWith("t") || str.endsWith("T")) memBytes = number * 1024 * 1024 * 1024 * 1024;
+            else throw new NumberFormatException("For input string: " + str);
+        }
+        return memBytes;
     }
 
     private void checkJvmVersion(EmbedBuilder embedBuilder, JsonObject system) {
@@ -314,45 +281,9 @@ public class TimingsMessageListener extends ListenerAdapter implements Closeable
         }
     }
 
-    private CompletableFuture<SimpleHttpResponse> execute(SimpleHttpRequest request) {
-        LOGGER.info("Queuing request for " + request.getRequestUri());
-        CompletableFuture<SimpleHttpResponse> future = new CompletableFuture<>();
-        try {
-            httpAsyncClient.execute(request, new FutureCallback<SimpleHttpResponse>() {
-                @Override
-                public void completed(SimpleHttpResponse result) {
-                    future.complete(result);
-                }
-
-                @Override
-                public void failed(Exception ex) {
-                    future.completeExceptionally(ex);
-                }
-
-                @Override
-                public void cancelled() {
-                    future.completeExceptionally(new CancellationException());
-                }
-            });
-        } catch (Throwable t) {
-            future.completeExceptionally(t);
-        }
-        return future;
-    }
-
     private CompletableFuture<Message> inProgress(Message message) {
         CompletableFuture<Message> future = new CompletableFuture<>();
         message.reply(new EmbedBuilder().setTitle("Query in progress").build()).queue(future::complete, future::completeExceptionally);
         return future;
-    }
-
-    @Override
-    public void close() {
-        httpAsyncClient.close(CloseMode.GRACEFUL);
-        connectionManager.close(CloseMode.GRACEFUL);
-        try {
-            httpAsyncClient.awaitShutdown(TimeValue.MAX_VALUE);
-        } catch (InterruptedException ignored) {
-        }
     }
 }

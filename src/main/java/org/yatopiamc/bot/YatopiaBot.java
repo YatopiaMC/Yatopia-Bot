@@ -4,21 +4,15 @@ import com.mrivanplays.jdcf.CommandManager;
 import com.mrivanplays.jdcf.builtin.CommandShutdown;
 import com.mrivanplays.jdcf.settings.CommandSettings;
 import com.mrivanplays.jdcf.settings.prefix.ImmutablePrefixHandler;
-import java.awt.Color;
-import java.io.IOException;
-import java.time.Instant;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.security.auth.login.LoginException;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yatopiamc.bot.commands.CommandAsk;
 import org.yatopiamc.bot.commands.CommandDownloadSpecific;
 import org.yatopiamc.bot.commands.CommandJDKSpecific;
@@ -33,10 +27,18 @@ import org.yatopiamc.bot.commands.CommandYatopiaSpecific;
 import org.yatopiamc.bot.mappings.MappingParser;
 import org.yatopiamc.bot.mappings.spigot.SpigotMappingHandler;
 import org.yatopiamc.bot.mappings.yarn.YarnMappingHandler;
-import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.yatopiamc.bot.timings.TimingsMessageListener;
+import org.yatopiamc.bot.util.NetworkUtils;
+
+import javax.security.auth.login.LoginException;
+import java.awt.*;
+import java.io.IOException;
+import java.time.Instant;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class YatopiaBot {
 
@@ -166,12 +168,8 @@ public class YatopiaBot {
     jda.awaitStatus(JDA.Status.CONNECTED);
     LOGGER.info("Online");
     Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-      timingsMessageListener.close();
+      NetworkUtils.shutdown();
       jda.shutdown();
-      try {
-        jda.awaitStatus(JDA.Status.DISCONNECTED);
-      } catch (InterruptedException ignored) {
-      }
     }));
   }
 }

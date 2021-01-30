@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class TimingsSuggestions {
@@ -245,14 +246,14 @@ public class TimingsSuggestions {
             suggestions.put("settings.fire-block-physics-event", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
                     configs -> configs.getAsJsonObject("yatopia").get("fire-block-physics-event").getAsBoolean()));
             suggestions.put("settings.intervals.player-time-statistics", new ConfigSuggestion("", "Increase this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries). Recommended: 20.",
-                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("intervals").get("fire-block-physics-event").getAsInt() <= 20));
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("intervals").get("player-time-statistics").getAsInt() <= 20));
             suggestions.put("settings.criterion-triggers.location", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
                     configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("criterion-triggers").get("location").getAsBoolean()));
             suggestions.put("settings.criterion-triggers.enter-block", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
                     configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("criterion-triggers").get("enter-block").getAsBoolean()));
-            suggestions.put("settings.criterion-triggers.enter-block", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
+            suggestions.put("settings.criterion-triggers.tick", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
                     configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("criterion-triggers").get("tick").getAsBoolean()));
-            suggestions.put("settings.criterion-triggers.enter-block", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
+            suggestions.put("settings.tick.enchanting-tables", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
                     configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("tick").get("enchanting-tables").getAsBoolean()));
             return suggestions;
         }));
@@ -288,16 +289,12 @@ public class TimingsSuggestions {
     public static class ConfigSuggestion {
         public final String prefix;
         public final String warning;
-        public final Predicate predicate;
+        public final Predicate<JsonObject> predicate;
 
-        public ConfigSuggestion(String prefix, String warning, Predicate predicate) {
+        public ConfigSuggestion(String prefix, String warning, Predicate<JsonObject> predicate) {
             this.prefix = prefix;
             this.warning = warning;
             this.predicate = predicate;
-        }
-
-        public interface Predicate {
-            boolean test(JsonObject configs);
         }
     }
 

@@ -6,7 +6,6 @@ plugins {
     java
     id("com.github.johnrengelman.shadow") version "6.1.0"
     `maven-publish`
-    application
 }
 
 repositories {
@@ -50,8 +49,10 @@ tasks.withType<JavaCompile>() {
     options.encoding = "UTF-8"
 }
 
-application {
-    mainClassName = "org.yatopiamc.bot.YatopiaBot"
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>() {
+    manifest {
+        attributes("Main-Class" to "org.yatopiamc.bot.YatopiaBot")
+    }
 }
 
 tasks {
