@@ -74,15 +74,30 @@ public class TimingsSuggestions {
         configSuggestions.put("server.properties", new ConfigServerSuggestion(() -> {
             Map<String, ConfigSuggestion> suggestions = new HashMap<>();
             suggestions.put("online-mode", new ConfigSuggestion("", "Enable this in [server.properties](http://bit.ly/servprop) for security.",
-                    configs -> !configs.getAsJsonObject("server.properties").get("online-mode").getAsBoolean() &&
-                            !configs.getAsJsonObject("spigot").getAsJsonObject("settings").get("bungeecord").getAsBoolean() &&
-                            (!configs.getAsJsonObject("paper").getAsJsonObject("settings").getAsJsonObject("velocity-support").get("online-mode").getAsBoolean() || !configs.getAsJsonObject("paper").getAsJsonObject("settings").getAsJsonObject("velocity-support").get("enabled").getAsBoolean())));
+                    configs -> {
+                        boolean isSafe = configs.getAsJsonObject("server.properties").get("online-mode").getAsBoolean();
+                        if (!isSafe && configs.has("spigot"))
+                            isSafe = configs.getAsJsonObject("spigot").getAsJsonObject("settings").get("bungeecord").getAsBoolean();
+                        if (!isSafe && configs.has("paper"))
+                            isSafe = configs.getAsJsonObject("paper").getAsJsonObject("settings").getAsJsonObject("velocity-support").get("enabled").getAsBoolean();
+                        return !isSafe;
+                    }));
             suggestions.put("network-compression-threshold: standalone", new ConfigSuggestion("", "Increase this in [server.properties](http://bit.ly/servprop). Recommended: 512.",
-                    configs -> configs.getAsJsonObject("server.properties").get("network-compression-threshold").getAsInt() <= 256 &&
-                            (!configs.getAsJsonObject("spigot").getAsJsonObject("settings").get("bungeecord").getAsBoolean() && !configs.getAsJsonObject("paper").getAsJsonObject("settings").getAsJsonObject("velocity-support").get("enabled").getAsBoolean())));
+                    configs -> {
+                        if (!(configs.has("paper") && !configs.getAsJsonObject("paper").getAsJsonObject("settings").getAsJsonObject("velocity-support").get("enabled").getAsBoolean()) ||
+                                !(configs.has("spigot") && !configs.getAsJsonObject("spigot").getAsJsonObject("settings").get("bungeecord").getAsBoolean())) {
+                            return false;
+                        }
+                        return configs.getAsJsonObject("server.properties").get("network-compression-threshold").getAsInt() <= 256;
+                    }));
             suggestions.put("network-compression-threshold: network", new ConfigSuggestion("", "Set this to -1 in [server.properties](http://bit.ly/servprop) for a bungee/velocity server like yours",
-                    configs -> configs.getAsJsonObject("server.properties").get("network-compression-threshold").getAsInt() != -1 &&
-                            (configs.getAsJsonObject("spigot").getAsJsonObject("settings").get("bungeecord").getAsBoolean() || configs.getAsJsonObject("paper").getAsJsonObject("settings").getAsJsonObject("velocity-support").get("enabled").getAsBoolean())));
+                    configs -> {
+                        if ((configs.has("paper") && !configs.getAsJsonObject("paper").getAsJsonObject("settings").getAsJsonObject("velocity-support").get("enabled").getAsBoolean()) ||
+                                (configs.has("spigot") && !configs.getAsJsonObject("spigot").getAsJsonObject("settings").get("bungeecord").getAsBoolean())) {
+                            return configs.getAsJsonObject("server.properties").get("network-compression-threshold").getAsInt() != -1;
+                        }
+                        return false;
+                    }));
             return suggestions;
         }));
         configSuggestions.put("bukkit", new ConfigServerSuggestion(() -> {
@@ -105,9 +120,8 @@ public class TimingsSuggestions {
         }));
         configSuggestions.put("spigot", new ConfigServerSuggestion(() -> {
             Map<String, ConfigSuggestion> suggestions = new HashMap<>();
-            suggestions.put("view-distance", new ConfigSuggestion("", "Decrease this from default (10) in [spigot.yml](http://bit.ly/spiconf). Recommended: 4.",
-                    configs -> configs.getAsJsonObject("server.properties").get("view-distance").getAsInt() >= 10 &&
-                            configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("view-distance").getAsString().equals("default"))));
+            suggestions.put("view-distance", new ConfigSuggestion("", "Set a value in [spigot.yml](http://bit.ly/spiconf). Recommended: 4.",
+                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("view-distance").getAsString().equals("default"))));
             suggestions.put("entity-activation-range.animals", new ConfigSuggestion("", "Decrease this in [spigot.yml](http://bit.ly/spiconf). Recommended: 16.",
                     configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-activation-range").get("animals").getAsInt() >= 32)));
             suggestions.put("entity-activation-range.monsters", new ConfigSuggestion("", "Decrease this in [spigot.yml](http://bit.ly/spiconf). Recommended: 16.",
@@ -129,35 +143,101 @@ public class TimingsSuggestions {
             suggestions.put("entity-activation-range.wake-up-inactive.monsters-for", new ConfigSuggestion("", "Decrease this in [spigot.yml](http://bit.ly/spiconf). Recommended: 60.",
                     configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-activation-range").getAsJsonObject("wake-up-inactive").get("monsters-max-per-tick").getAsInt() >= 1 && entry.getValue().getAsJsonObject().getAsJsonObject("entity-activation-range").getAsJsonObject("wake-up-inactive").get("monsters-for").getAsInt() >= 100)));
             suggestions.put("entity-activation-range.wake-up-inactive.villagers-max-per-tick", new ConfigSuggestion("", "Decrease this in [spigot.yml](http://bit.ly/spiconf). Recommended: 1.",
-                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-activation-range").get("villagers-max-per-tick").getAsInt() >= 4)));
+                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-activation-range").getAsJsonObject("wake-up-inactive").get("villagers-max-per-tick").getAsInt() >= 4)));
             suggestions.put("entity-activation-range.wake-up-inactive.monsters-max-per-tick", new ConfigSuggestion("", "Decrease this in [spigot.yml](http://bit.ly/spiconf). Recommended: 4.",
-                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-activation-range").get("monsters-max-per-tick").getAsInt() >= 8)));
+                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-activation-range").getAsJsonObject("wake-up-inactive").get("monsters-max-per-tick").getAsInt() >= 8)));
             suggestions.put("entity-activation-range.wake-up-inactive.flying-monsters-max-per-tick", new ConfigSuggestion("", "Decrease this in [spigot.yml](http://bit.ly/spiconf). Recommended: 1.",
-                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-activation-range").get("flying-monsters-max-per-tick").getAsInt() >= 8)));
+                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-activation-range").getAsJsonObject("wake-up-inactive").get("flying-monsters-max-per-tick").getAsInt() >= 8)));
             suggestions.put("entity-activation-range.wake-up-inactive.animals-max-per-tick", new ConfigSuggestion("", "Decrease this in [spigot.yml](http://bit.ly/spiconf). Recommended: 2.",
-                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-activation-range").get("animals-max-per-tick").getAsInt() >= 4)));
-            suggestions.put("", new ConfigSuggestion("", "",
-                    configs -> ));
-            suggestions.put("", new ConfigSuggestion("", "",
-                    configs -> ));
-            suggestions.put("", new ConfigSuggestion("", "",
-                    configs -> ));
-            suggestions.put("", new ConfigSuggestion("", "",
-                    configs -> ));
-            suggestions.put("", new ConfigSuggestion("", "",
-                    configs -> ));
-            suggestions.put("", new ConfigSuggestion("", "",
-                    configs -> ));
-
-
+                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-activation-range").getAsJsonObject("wake-up-inactive").get("animals-max-per-tick").getAsInt() >= 4)));
+            suggestions.put("nerf-spawner-mobs", new ConfigSuggestion("", "Enable this in [spigot.yml](http://bit.ly/spiconf).",
+                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().get("nerf-spawner-mobs").getAsBoolean())));
+            suggestions.put("arrow-despawn-rate", new ConfigSuggestion("", "Decrease this in [spigot.yml](http://bit.ly/spiconf). Recommended: 300.",
+                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("arrow-despawn-rate").getAsInt() >= 1200)));
+            suggestions.put("merge-radius.item", new ConfigSuggestion("", "Increase this in [spigot.yml](http://bit.ly/spiconf). Recommended: 4.0.",
+                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("merge-radius").get("item").getAsFloat() <= 2.5)));
+            suggestions.put("merge-radius.exp", new ConfigSuggestion("", "Increase this in [spigot.yml](http://bit.ly/spiconf). Recommended: 6.0.",
+                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("merge-radius").get("exp").getAsFloat() <= 3.0)));
+            suggestions.put("max-entity-collisions", new ConfigSuggestion("", "Decrease this in [spigot.yml](http://bit.ly/spiconf). Recommended: 2.",
+                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("max-entity-collisions").getAsInt() >= 8)));
+            suggestions.put("mob-spawn-range", new ConfigSuggestion("", "Decrease this in [spigot.yml](http://bit.ly/spiconf). Recommended: lower than view distance.",
+                    configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> {
+                        final String spigotVD = entry.getValue().getAsJsonObject().get("view-distance").getAsString();
+                        int viewDistance;
+                        try {
+                            viewDistance = Integer.parseInt(spigotVD);
+                        } catch (NumberFormatException e) {
+                            if(configs.has("server.properties"))
+                                viewDistance = configs.getAsJsonObject("server.properties").get("view-distance").getAsInt();
+                            else throw new ReportedException("Set view-distance in spigot.yml");
+                        }
+                        final int mobSpawnRange = entry.getValue().getAsJsonObject().get("mob-spawn-range").getAsInt();
+                        return mobSpawnRange >= viewDistance;
+                    })));
             return suggestions;
         }));
         configSuggestions.put("paper", new ConfigServerSuggestion(() -> {
             Map<String, ConfigSuggestion> suggestions = new HashMap<>();
+            suggestions.put("max-auto-save-chunks-per-tick", new ConfigSuggestion("", "Decrease this in [paper.yml](http://bit.ly/paperconf). Recommended: 6.",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("max-auto-save-chunks-per-tick").getAsInt() >= 24)));
+            suggestions.put("optimize-explosions", new ConfigSuggestion("", "Enable this in [paper.yml](http://bit.ly/paperconf).",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().get("optimize-explosions").getAsBoolean())));
+            suggestions.put("mob-spawner-tick-rate", new ConfigSuggestion("", "Increase this in [paper.yml](http://bit.ly/paperconf). Recommended: 2.",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("mob-spawner-tick-rate").getAsInt() == 1)));
+            suggestions.put("game-mechanics.disable-chest-cat-detection", new ConfigSuggestion("", "Enable this in [paper.yml](http://bit.ly/paperconf)",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().getAsJsonObject("game-mechanics").get("disable-chest-cat-detection").getAsBoolean())));
+            suggestions.put("container-update-tick-rate", new ConfigSuggestion("", "Increase this in [paper.yml](http://bit.ly/paperconf). Recommended: 3.",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("container-update-tick-rate").getAsInt() == 1)));
+            suggestions.put("grass-spread-tick-rate", new ConfigSuggestion("", "\"Increase this in [paper.yml](http://bit.ly/paperconf). Recommended: 4.",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("grass-spread-tick-rate").getAsInt() == 1)));
+            suggestions.put("despawn-ranges.soft", new ConfigSuggestion("", "Decrease this in [paper.yml](http://bit.ly/paperconf). Recommended: 28.",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("despawn-ranges").get("soft").getAsInt() >= 32)));
+            suggestions.put("despawn-ranges.hard", new ConfigSuggestion("", "Decrease this in [paper.yml](http://bit.ly/paperconf). Recommended: 48.",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("despawn-ranges").get("hard").getAsInt() >= 128)));
+            suggestions.put("hopper.disable-move-event", new ConfigSuggestion("", "Enable this in [paper.yml](http://bit.ly/paperconf).",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().getAsJsonObject("hopper").get("disable-move-event").getAsBoolean())));
+            suggestions.put("non-player-arrow-despawn-rate", new ConfigSuggestion("", "Set a value in [paper.yml](http://bit.ly/paperconf). Recommended: 60",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("non-player-arrow-despawn-rate").getAsInt() == -1)));
+            suggestions.put("creative-arrow-despawn-rate", new ConfigSuggestion("", "Set a value in [paper.yml](http://bit.ly/paperconf). Recommended: 60",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("creative-arrow-despawn-rate").getAsInt() == -1)));
+            suggestions.put("prevent-moving-into-unloaded-chunks", new ConfigSuggestion("", "Enable this in [paper.yml](http://bit.ly/paperconf).",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().get("prevent-moving-into-unloaded-chunks").getAsBoolean())));
+            suggestions.put("use-faster-eigencraft-redstone", new ConfigSuggestion("", "Enable this in [paper.yml](http://bit.ly/paperconf).",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().get("use-faster-eigencraft-redstone").getAsBoolean())));
+            suggestions.put("fix-climbing-bypassing-cramming-rule", new ConfigSuggestion("", "Enable this in [paper.yml](http://bit.ly/paperconf).",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().get("fix-climbing-bypassing-cramming-rule").getAsBoolean())));
+            suggestions.put("armor-stands-do-collision-entity-lookups", new ConfigSuggestion("", "Disable this in [paper.yml](http://bit.ly/paperconf).",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("armor-stands-do-collision-entity-lookups").getAsBoolean())));
+            suggestions.put("per-player-mob-spawns", new ConfigSuggestion("", "Enable this in [paper.yml](http://bit.ly/paperconf).",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().get("per-player-mob-spawns").getAsBoolean())));
+            suggestions.put("alt-item-despawn-rate.enabled", new ConfigSuggestion("", "Enable this in [paper.yml](http://bit.ly/paperconf).",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().getAsJsonObject("alt-item-despawn-rate").get("enabled").getAsBoolean())));
+            suggestions.put("entity-per-chunk-save-limit.experience_orb", new ConfigSuggestion("", "Set a value in [paper.yml](https://github.com/PaperMC/Paper/pull/4792). Recommended: 16.",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-per-chunk-save-limit").get("experience_orb").getAsInt() == -1)));
+            suggestions.put("entity-per-chunk-save-limit.snowball", new ConfigSuggestion("", "Set a value in [paper.yml](https://github.com/PaperMC/Paper/pull/4792). Recommended: 16.",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-per-chunk-save-limit").get("snowball").getAsInt() == -1)));
+            suggestions.put("entity-per-chunk-save-limit.ender_pearl", new ConfigSuggestion("", "Set a value in [paper.yml](https://github.com/PaperMC/Paper/pull/4792). Recommended: 16.",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-per-chunk-save-limit").get("ender_pearl").getAsInt() == -1)));
+            suggestions.put("entity-per-chunk-save-limit.arrow", new ConfigSuggestion("", "Set a value in [paper.yml](https://github.com/PaperMC/Paper/pull/4792). Recommended: 16.",
+                    configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-per-chunk-save-limit").get("arrow").getAsInt() == -1)));
             return suggestions;
         }));
         configSuggestions.put("purpur", new ConfigServerSuggestion(() -> {
             Map<String, ConfigSuggestion> suggestions = new HashMap<>();
+            suggestions.put("settings.dont-send-useless-entity-packets", new ConfigSuggestion("", "Enable this in [purpur.yml](http://bit.ly/purpurc).",
+                    configs -> !configs.getAsJsonObject("purpur").get("dont-send-useless-entity-packets").getAsBoolean()));
+            suggestions.put("mobs.villager.brain-ticks", new ConfigSuggestion("", "Increase this in [purpur.yml](http://bit.ly/purpurc). Recommended: 4.",
+                    configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("mobs").getAsJsonObject("villager").get("brain-ticks").getAsInt() == 1)));
+            suggestions.put("mobs.villager.spawn-iron-golem.radius", new ConfigSuggestion("", "Increase this in [purpur.yml](http://bit.ly/purpurc). Recommended: 5.",
+                    configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("mobs").getAsJsonObject("villager").getAsJsonObject("spawn-iron-golem").get("radius").getAsInt() == 0)));
+            suggestions.put("mobs.zombie.aggressive-towards-villager-when-lagging", new ConfigSuggestion("", "Disable this in [purpur.yml](http://bit.ly/purpurc).",
+                    configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("mobs").getAsJsonObject("zombie").get("aggressive-towards-villager-when-lagging").getAsBoolean())));
+            suggestions.put("mobs.villager.lobotomize.enabled", new ConfigSuggestion("", "Enable this in [purpur.yml](http://bit.ly/purpurc).",
+                    configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().getAsJsonObject("mobs").getAsJsonObject("villager").getAsJsonObject("lobotomize").get("enabled").getAsBoolean())));
+            suggestions.put("gameplay-mechanics.entities-can-use-portals", new ConfigSuggestion("", "Disable this in [purpur.yml](http://bit.ly/purpurc) to prevent players from creating chunk anchors.",
+                    configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("gameplay-mechanics").get("entities-can-use-portals").getAsBoolean())));
+            suggestions.put("gameplay-mechanics.player.teleport-if-outside-border", new ConfigSuggestion("", "Enable this in [purpur.yml](http://bit.ly/purpurc).",
+                    configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().getAsJsonObject("gameplay-mechanics").getAsJsonObject("player").get("teleport-if-outside-border").getAsBoolean())));
             return suggestions;
         }));
         SERVER_CONFIG_SUGGESTIONS = configSuggestions;
@@ -202,6 +282,13 @@ public class TimingsSuggestions {
 
         public interface Predicate {
             boolean test(JsonObject configs);
+        }
+    }
+
+    public static class ReportedException extends RuntimeException {
+
+        public ReportedException(String message) {
+            super(message);
         }
     }
 }

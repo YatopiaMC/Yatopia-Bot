@@ -4,6 +4,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -34,6 +35,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -127,7 +130,7 @@ public class TimingsMessageListener extends ListenerAdapter implements Closeable
         final CompletableFuture<SimpleHttpResponse> timingsJsonRequest = loadingCache.getUnchecked(timingsHost + "data.php?id=" + timingsId);
         final EmbedBuilder embedBuilder = new EmbedBuilder();
         embedBuilder.setTitle("Timings Analysis", url);
-        timingsJsonRequest.handle((response, throwable) -> {
+        timingsJsonRequest.handleAsync((response, throwable) -> {
             boolean hasError = false;
             long startProcessingTime = System.currentTimeMillis();
             try {
@@ -140,13 +143,20 @@ public class TimingsMessageListener extends ListenerAdapter implements Closeable
                     embedBuilder.appendDescription(exception.toString());
                     return null;
                 }
-                final JsonObject jsonObject = new Gson().fromJson(response.getBodyText(), JsonObject.class);
+                final JsonElement jsonElement = new Gson().fromJson(response.getBodyText(), JsonElement.class);
+                if (!jsonElement.isJsonObject()) {
+                    embedBuilder.setTitle("Invalid Timings report");
+                    hasError = true;
+                    return null;
+                }
+                final JsonObject jsonObject = jsonElement.getAsJsonObject();
                 if (jsonObject.has("timingsMaster")) {
                     final JsonObject timingsMaster = jsonObject.getAsJsonObject("timingsMaster");
                     checkMinecraftVersion(embedBuilder, timingsMaster);
                     checkSystem(embedBuilder, timingsMaster);
                     checkDataPacks(embedBuilder, timingsMaster);
                     checkPlugins(embedBuilder, timingsMaster);
+                    checkServerConfigs(embedBuilder, timingsMaster);
                 }
                 return null;
             } catch (Throwable t) {
@@ -158,7 +168,7 @@ public class TimingsMessageListener extends ListenerAdapter implements Closeable
                 embedBuilder.appendDescription(exception.toString());
                 return null;
             } finally {
-                if(embedBuilder.getFields().isEmpty() && !hasError) {
+                if (embedBuilder.getFields().isEmpty() && !hasError) {
                     embedBuilder.addField("All good", "Analyzed with no issues", true);
                 }
                 embedBuilder.setFooter(String.format("Timing: %dms network, %dms processing", startProcessingTime - startTime, System.currentTimeMillis() - startProcessingTime));
@@ -166,7 +176,7 @@ public class TimingsMessageListener extends ListenerAdapter implements Closeable
                     if(msg != null) {
                         msg.editMessage(embedBuilder.build()).queue();
                     }
-                    if(t != null) {
+                    if (t != null) {
                         LOGGER.warn("An unexpected error occurred while sending message", t);
                     }
                     return null;
@@ -175,14 +185,49 @@ public class TimingsMessageListener extends ListenerAdapter implements Closeable
         });
     }
 
+    private void checkServerConfigs(EmbedBuilder embedBuilder, JsonObject timingsMaster) {
+        final JsonObject configs = timingsMaster.getAsJsonObject("config");
+        TimingsSuggestions.SERVER_CONFIG_SUGGESTIONS.entrySet().stream()
+                .filter(entry -> configs.has(entry.getKey()))
+                .sorted(Map.Entry.comparingByKey())
+                .flatMap(entry -> entry.getValue().suggestions.entrySet().stream().sorted(Map.Entry.comparingByKey()))
+                .forEach(entry -> {
+                    try {
+                        if (entry.getValue().predicate.test(configs))
+                            embedBuilder.addField(entry.getKey(), entry.getValue().prefix + " " + entry.getValue().warning, true);
+                    } catch (NullPointerException ignored) {
+                    } catch (Throwable t) {
+                        embedBuilder.addField(entry.getKey(), "Error evaluating expression: " + t.toString(), true);
+                        LOGGER.warn(t.toString());
+                    }
+                });
+        final JsonObject plugins = timingsMaster.getAsJsonObject("plugins");
+        try {
+            if (plugins.has("TCPShield") && configs.has("purpur") && configs.getAsJsonObject("purpur").getAsJsonObject("settings").get("use-alternate-keepalive").getAsBoolean())
+                embedBuilder.addField("settings.use-alternate-keepalive", "Disable this in [purpur.yml](http://bit.ly/purpurc). It can cause issues with TCPShield", true);
+        } catch (NullPointerException ignored) {
+        }
+        try {
+            if (!plugins.has("TCPShield") && configs.has("purpur") && !configs.getAsJsonObject("purpur").getAsJsonObject("settings").get("use-alternate-keepalive").getAsBoolean())
+                embedBuilder.addField("settings.use-alternate-keepalive", "Enable this in [purpur.yml](http://bit.ly/purpurc).", true);
+        } catch (NullPointerException ignored) {
+        }
+        try {
+            if ((plugins.has("PetBlocks") || plugins.has("BlockBalls") || plugins.has("ArmorStandTools")) &&
+                    configs.has("paper") && configs.getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("armor-stands-tick").getAsBoolean()))
+                embedBuilder.addField("armor-stands-tick", "Disable this in [paper.yml](http://bit.ly/paperconf).", true);
+        } catch (NullPointerException ignored) {
+        }
+    }
+
     private void checkPlugins(EmbedBuilder embedBuilder, JsonObject timingsMaster) {
         final JsonObject plugins = timingsMaster.getAsJsonObject("plugins");
         final JsonObject configs = timingsMaster.getAsJsonObject("config");
         TimingsSuggestions.SERVER_PLUGIN_SUGGESTIONS.entrySet().stream().flatMap(entry -> {
-            if(configs.has(entry.getKey()))
+            if (configs.has(entry.getKey()))
                 return entry.getValue().suggestions.entrySet().stream();
             return Stream.empty();
-        }).filter(entry -> plugins.has(entry.getKey())).forEach(entry -> {
+        }).sorted(Map.Entry.comparingByKey()).filter(entry -> plugins.has(entry.getKey())).forEach(entry -> {
             embedBuilder.addField(String.format("%s %s", entry.getKey(), entry.getValue().prefix), entry.getValue().warning, true);
         });
     }
