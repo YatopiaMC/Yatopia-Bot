@@ -120,7 +120,7 @@ public class TimingsSuggestions {
         }));
         configSuggestions.put("spigot", new ConfigServerSuggestion(() -> {
             Map<String, ConfigSuggestion> suggestions = new HashMap<>();
-            suggestions.put("view-distance", new ConfigSuggestion("", "Set a value in [spigot.yml](http://bit.ly/spiconf). Recommended: 4.",
+            suggestions.put("view-distance", new ConfigSuggestion("", "Set a value in [spigot.yml](http://bit.ly/spiconf). Recommended: 4 and set no-tick-view-distance to a reasonable view distance.",
                     configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("view-distance").getAsString().equals("default"))));
             suggestions.put("entity-activation-range.animals", new ConfigSuggestion("", "Decrease this in [spigot.yml](http://bit.ly/spiconf). Recommended: 16.",
                     configs -> configs.getAsJsonObject("spigot").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("entity-activation-range").get("animals").getAsInt() >= 32)));
@@ -238,6 +238,22 @@ public class TimingsSuggestions {
                     configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("gameplay-mechanics").get("entities-can-use-portals").getAsBoolean())));
             suggestions.put("gameplay-mechanics.player.teleport-if-outside-border", new ConfigSuggestion("", "Enable this in [purpur.yml](http://bit.ly/purpurc).",
                     configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().getAsJsonObject("gameplay-mechanics").getAsJsonObject("player").get("teleport-if-outside-border").getAsBoolean())));
+            return suggestions;
+        }));
+        configSuggestions.put("yatopia", new ConfigServerSuggestion(() -> {
+            Map<String, ConfigSuggestion> suggestions = new HashMap<>();
+            suggestions.put("settings.fire-block-physics-event", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
+                    configs -> configs.getAsJsonObject("yatopia").get("fire-block-physics-event").getAsBoolean()));
+            suggestions.put("settings.intervals.player-time-statistics", new ConfigSuggestion("", "Increase this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries). Recommended: 20.",
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("intervals").get("fire-block-physics-event").getAsInt() <= 20));
+            suggestions.put("settings.criterion-triggers.location", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("criterion-triggers").get("location").getAsBoolean()));
+            suggestions.put("settings.criterion-triggers.enter-block", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("criterion-triggers").get("enter-block").getAsBoolean()));
+            suggestions.put("settings.criterion-triggers.enter-block", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("criterion-triggers").get("tick").getAsBoolean()));
+            suggestions.put("settings.criterion-triggers.enter-block", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("tick").get("enchanting-tables").getAsBoolean()));
             return suggestions;
         }));
         SERVER_CONFIG_SUGGESTIONS = configSuggestions;
