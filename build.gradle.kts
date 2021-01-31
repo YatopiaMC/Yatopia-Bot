@@ -32,6 +32,7 @@ dependencies {
     implementation("com.google.guava:guava:30.1-jre")
     testImplementation("org.junit.jupiter:junit-jupiter-engine:5.5.2")
     testImplementation("org.junit.platform:junit-platform-runner:1.5.2")
+    implementation("com.mrivanplays:BinClient:1.0.1-SNAPSHOT")
 }
 
 group = "org.yatopiamc"

@@ -26,6 +26,7 @@ import org.yatopiamc.bot.commands.CommandYatopiaSpecific;
 import org.yatopiamc.bot.mappings.MappingParser;
 import org.yatopiamc.bot.mappings.spigot.SpigotMappingHandler;
 import org.yatopiamc.bot.mappings.yarn.YarnMappingHandler;
+import org.yatopiamc.bot.paste.PasteMessageListener;
 import org.yatopiamc.bot.timings.TimingsMessageListener;
 import org.yatopiamc.bot.util.NetworkUtils;
 
@@ -43,6 +44,7 @@ public class YatopiaBot {
 
   public static final Logger LOGGER = LoggerFactory.getLogger(YatopiaBot.class);
   private final TimingsMessageListener timingsMessageListener = new TimingsMessageListener();
+  private final PasteMessageListener pasteMessageListener = new PasteMessageListener();
 
   public static void main(String[] args) throws LoginException, InterruptedException, IOException {
     ConfigInitializer config = new ConfigInitializer();
@@ -88,6 +90,7 @@ public class YatopiaBot {
             .setActivity(Activity.playing("Yatopia.jar"))
             .disableCache(CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
             .addEventListeners(timingsMessageListener)
+            .addEventListeners(pasteMessageListener)
             .build()
             .awaitReady();
 
