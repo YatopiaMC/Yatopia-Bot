@@ -93,8 +93,8 @@ public class TimingsSuggestions {
                     }));
             suggestions.put("network-compression-threshold: network", new ConfigSuggestion("", "Set this to -1 in [server.properties](http://bit.ly/servprop) for a bungee/velocity server like yours",
                     configs -> {
-                        if ((configs.has("paper") && !configs.getAsJsonObject("paper").getAsJsonObject("settings").getAsJsonObject("velocity-support").get("enabled").getAsBoolean()) ||
-                                (configs.has("spigot") && !configs.getAsJsonObject("spigot").getAsJsonObject("settings").get("bungeecord").getAsBoolean())) {
+                        if ((configs.has("paper") && configs.getAsJsonObject("paper").getAsJsonObject("settings").getAsJsonObject("velocity-support").get("enabled").getAsBoolean()) ||
+                                (configs.has("spigot") && configs.getAsJsonObject("spigot").getAsJsonObject("settings").get("bungeecord").getAsBoolean())) {
                             return configs.getAsJsonObject("server.properties").get("network-compression-threshold").getAsInt() != -1;
                         }
                         return false;
@@ -226,7 +226,7 @@ public class TimingsSuggestions {
         configSuggestions.put("purpur", new ConfigServerSuggestion(() -> {
             Map<String, ConfigSuggestion> suggestions = new HashMap<>();
             suggestions.put("settings.dont-send-useless-entity-packets", new ConfigSuggestion("", "Enable this in [purpur.yml](http://bit.ly/purpurc).",
-                    configs -> !configs.getAsJsonObject("purpur").get("dont-send-useless-entity-packets").getAsBoolean()));
+                    configs -> !configs.getAsJsonObject("purpur").getAsJsonObject("settings").get("dont-send-useless-entity-packets").getAsBoolean()));
             suggestions.put("mobs.villager.brain-ticks", new ConfigSuggestion("", "Increase this in [purpur.yml](http://bit.ly/purpurc). Recommended: 4.",
                     configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("mobs").getAsJsonObject("villager").get("brain-ticks").getAsInt() == 1)));
             suggestions.put("mobs.villager.spawn-iron-golem.radius", new ConfigSuggestion("", "Increase this in [purpur.yml](http://bit.ly/purpurc). Recommended: 5.",
@@ -244,17 +244,17 @@ public class TimingsSuggestions {
         configSuggestions.put("yatopia", new ConfigServerSuggestion(() -> {
             Map<String, ConfigSuggestion> suggestions = new HashMap<>();
             suggestions.put("settings.fire-block-physics-event", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
-                    configs -> configs.getAsJsonObject("yatopia").get("fire-block-physics-event").getAsBoolean()));
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("settings").get("fire-block-physics-event").getAsBoolean()));
             suggestions.put("settings.intervals.player-time-statistics", new ConfigSuggestion("", "Increase this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries). Recommended: 20.",
-                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("intervals").get("player-time-statistics").getAsInt() <= 20));
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("settings").getAsJsonObject("intervals").get("player-time-statistics").getAsInt() <= 20));
             suggestions.put("settings.criterion-triggers.location", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
-                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("criterion-triggers").get("location").getAsBoolean()));
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("settings").getAsJsonObject("criterion-triggers").get("location").getAsBoolean()));
             suggestions.put("settings.criterion-triggers.enter-block", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
-                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("criterion-triggers").get("enter-block").getAsBoolean()));
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("settings").getAsJsonObject("criterion-triggers").get("enter-block").getAsBoolean()));
             suggestions.put("settings.criterion-triggers.tick", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
-                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("criterion-triggers").get("tick").getAsBoolean()));
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("settings").getAsJsonObject("criterion-triggers").get("tick").getAsBoolean()));
             suggestions.put("settings.tick.enchanting-tables", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
-                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("tick").get("enchanting-tables").getAsBoolean()));
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("settings").getAsJsonObject("tick").get("enchanting-tables").getAsBoolean()));
             return suggestions;
         }));
         SERVER_CONFIG_SUGGESTIONS = configSuggestions;
