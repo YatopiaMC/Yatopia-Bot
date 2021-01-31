@@ -32,21 +32,6 @@ public final class Utils {
     return pages;
   }
 
-  public static boolean containsSingleWord(String content, String word) {
-    content = content.toLowerCase();
-    word = word.toLowerCase();
-    if (content.indexOf(' ') == -1 && word.indexOf(' ') == -1) {
-      return content.equalsIgnoreCase(word);
-    }
-    String[] parts = content.split(" ");
-    for (String part : parts) {
-      if (part.toLowerCase().contains(word)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   public static Call newCall(Request request) {
     return HTTP_CLIENT.newCall(request);
   }
