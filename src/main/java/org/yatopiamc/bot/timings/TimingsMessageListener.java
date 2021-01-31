@@ -8,6 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
@@ -23,7 +24,9 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
@@ -122,6 +125,16 @@ public class TimingsMessageListener extends ListenerAdapter {
             } finally {
                 if (embedBuilder.getFields().isEmpty() && !hasError) {
                     embedBuilder.addField("All good", "Analyzed with no issues", true);
+                }
+                final int size = embedBuilder.getFields().size();
+                if(size > 24) {
+                    final List<MessageEmbed.Field> fields = new ArrayList<>(embedBuilder.getFields());
+                    embedBuilder.clearFields();
+                    for (int i = 0; i < 24; i++) {
+                        MessageEmbed.Field field = fields.get(i);
+                        embedBuilder.addField(field);
+                    }
+                    embedBuilder.addField(String.format("Plus %d more recommendations", size - 24), "Create a new timings report after resolving some of the above issues to see more.", false);
                 }
                 embedBuilder.setFooter(String.format("Timing: %dms network, %dms processing", startProcessingTime - startTime, System.currentTimeMillis() - startProcessingTime));
                 inProgress.handle((msg, t) -> {
