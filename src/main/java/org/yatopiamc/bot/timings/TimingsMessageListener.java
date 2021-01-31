@@ -9,6 +9,7 @@ import com.google.gson.JsonObject;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.apache.hc.client5.http.async.methods.SimpleHttpRequest;
@@ -20,10 +21,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yatopiamc.bot.util.NetworkUtils;
 
+import java.awt.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -84,7 +87,11 @@ public class TimingsMessageListener extends ListenerAdapter {
         final CompletableFuture<Message> inProgress = inProgress(message);
         final CompletableFuture<SimpleHttpResponse> timingsJsonRequest = loadingCache.getUnchecked(timingsHost + "data.php?id=" + timingsId);
         final EmbedBuilder embedBuilder = new EmbedBuilder();
-        embedBuilder.setTitle("Timings Analysis", url);
+        final User messageAuthor = event.getAuthor();
+        embedBuilder.setTitle("Timings Analysis"); //remove url because people delete timings reports
+        embedBuilder.setColor(0xffff00);
+        embedBuilder.setTimestamp(Instant.now());
+        embedBuilder.setAuthor(messageAuthor.getAsTag(), messageAuthor.getEffectiveAvatarUrl(), messageAuthor.getEffectiveAvatarUrl());
         timingsJsonRequest.handleAsync((response, throwable) -> {
             boolean hasError = false;
             long startProcessingTime = System.currentTimeMillis();
@@ -136,7 +143,8 @@ public class TimingsMessageListener extends ListenerAdapter {
                     }
                     embedBuilder.addField(String.format("Plus %d more recommendations", size - 24), "Create a new timings report after resolving some of the above issues to see more.", false);
                 }
-                embedBuilder.setFooter(String.format("Timing: %dms network, %dms processing", startProcessingTime - startTime, System.currentTimeMillis() - startProcessingTime));
+                embedBuilder.setFooter(String.format("https://yatopiamc.org/ • Timing: %dms network, %dms processing", startProcessingTime - startTime, System.currentTimeMillis() - startProcessingTime),
+                        event.getJDA().getSelfUser().getEffectiveAvatarUrl());
                 inProgress.handle((msg, t) -> {
                     if(msg != null) {
                         msg.editMessage(embedBuilder.build()).queue();
@@ -219,7 +227,7 @@ public class TimingsMessageListener extends ListenerAdapter {
     private void checkCPU(EmbedBuilder embedBuilder, JsonObject system) {
         final int cpu = system.get("cpu").getAsInt();
         if(cpu < 4)
-            embedBuilder.addField("CPU Threads", String.format("You have only %d thread(s). Find a better host", cpu), true);
+            embedBuilder.addField("CPU Threads", String.format("You have only %d thread(s). Find a better host.", cpu), true);
     }
 
     private void checkJvmFlags(EmbedBuilder embedBuilder, JsonObject system) {

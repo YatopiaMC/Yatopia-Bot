@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yatopiamc.bot.commands.CommandAsk;
 import org.yatopiamc.bot.commands.CommandDownloadSpecific;
 import org.yatopiamc.bot.commands.CommandJDKSpecific;
 import org.yatopiamc.bot.commands.CommandMappingSpecific;
@@ -121,9 +120,9 @@ public class YatopiaBot {
     settings.setHelpCommandEmbed(
         () ->
             EmbedUtil.defaultEmbed()
-                .setTitle("`()` - optional ; `[]` - required")
+                .setTitle("Yatopia Bot -- `()` - optional, `[]` - required")
                 .setThumbnail(
-                    "https://cdn.discordapp.com/attachments/745296670631395482/745298764788400238/yatipia.png"));
+                    "https://yatopiamc.org/static/img/yatopia-shiny.gif"));
     settings.setFailReasonHandler(null);
     settings.setCommandsPerHelpPage(10);
     settings.setLogExecutedCommands(true);
@@ -137,7 +136,6 @@ public class YatopiaBot {
         new CommandJDKSpecific(),
         new CommandDownloadSpecific(),
         new CommandYatopiaSpecific(),
-        new CommandAsk(),
         new CommandVanilla(),
         new CommandUpstream(),
         new CommandMappingSpecific(this),
