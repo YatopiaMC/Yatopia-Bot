@@ -246,7 +246,7 @@ public class TimingsSuggestions {
             suggestions.put("settings.fire-block-physics-event", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries).",
                     configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("settings").get("fire-block-physics-event").getAsBoolean()));
             suggestions.put("settings.intervals.player-time-statistics", new ConfigSuggestion("", "Increase this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries). Recommended: 20.",
-                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("settings").getAsJsonObject("intervals").get("player-time-statistics").getAsInt() <= 20));
+                    configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("settings").getAsJsonObject("intervals").get("player-time-statistics").getAsInt() < 20));
             suggestions.put("settings.criterion-triggers.location", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries) If you don't have any datapacks that use criterion triggers.",
                     configs -> configs.getAsJsonObject("yatopia").getAsJsonObject("settings").getAsJsonObject("criterion-triggers").get("location").getAsBoolean()));
             suggestions.put("settings.criterion-triggers.enter-block", new ConfigSuggestion("", "Disable this in [yatopia.yml](https://github.com/YatopiaMC/Yatopia/wiki/Config-Entries) If you don't have any datapacks that use criterion triggers.",
