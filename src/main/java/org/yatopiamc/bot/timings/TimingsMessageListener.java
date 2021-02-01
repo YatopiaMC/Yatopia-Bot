@@ -174,7 +174,19 @@ public class TimingsMessageListener extends ListenerAdapter {
                         LOGGER.warn(t.toString());
                     }
                 });
+    }
+
+    private void checkPlugins(EmbedBuilder embedBuilder, JsonObject timingsMaster) {
+        if(!timingsMaster.get("plugins").isJsonObject()) return;
         final JsonObject plugins = timingsMaster.getAsJsonObject("plugins");
+        final JsonObject configs = timingsMaster.getAsJsonObject("config");
+        TimingsSuggestions.SERVER_PLUGIN_SUGGESTIONS.entrySet().stream().flatMap(entry -> {
+            if (configs.has(entry.getKey()))
+                return entry.getValue().suggestions.entrySet().stream();
+            return Stream.empty();
+        }).sorted(Map.Entry.comparingByKey()).filter(entry -> plugins.has(entry.getKey())).forEach(entry -> {
+            embedBuilder.addField(String.format("%s %s", entry.getKey(), entry.getValue().prefix), entry.getValue().warning, true);
+        });
         try {
             if (plugins.has("TCPShield") && configs.has("purpur") && configs.getAsJsonObject("purpur").getAsJsonObject("settings").get("use-alternate-keepalive").getAsBoolean())
                 embedBuilder.addField("settings.use-alternate-keepalive", "Disable this in [purpur.yml](http://bit.ly/purpurc). It can cause issues with TCPShield", true);
@@ -191,18 +203,6 @@ public class TimingsMessageListener extends ListenerAdapter {
                 embedBuilder.addField("armor-stands-tick", "Disable this in [paper.yml](http://bit.ly/paperconf).", true);
         } catch (NullPointerException ignored) {
         }
-    }
-
-    private void checkPlugins(EmbedBuilder embedBuilder, JsonObject timingsMaster) {
-        final JsonObject plugins = timingsMaster.getAsJsonObject("plugins");
-        final JsonObject configs = timingsMaster.getAsJsonObject("config");
-        TimingsSuggestions.SERVER_PLUGIN_SUGGESTIONS.entrySet().stream().flatMap(entry -> {
-            if (configs.has(entry.getKey()))
-                return entry.getValue().suggestions.entrySet().stream();
-            return Stream.empty();
-        }).sorted(Map.Entry.comparingByKey()).filter(entry -> plugins.has(entry.getKey())).forEach(entry -> {
-            embedBuilder.addField(String.format("%s %s", entry.getKey(), entry.getValue().prefix), entry.getValue().warning, true);
-        });
     }
 
     private void checkDataPacks(EmbedBuilder embedBuilder, JsonObject timingsMaster) {
