@@ -109,13 +109,13 @@ public class TimingsSuggestions {
                     configs -> configs.getAsJsonObject("bukkit").getAsJsonObject("ticks-per").get("monster-spawns").getAsInt() == 1));
             suggestions.put("spawn-limits.monsters", new ConfigSuggestion("", "Decrease this in [bukkit.yml](https://bukkit.gamepedia.com/Bukkit.yml). Recommended: 15.",
                     configs -> configs.getAsJsonObject("bukkit").getAsJsonObject("spawn-limits").get("monsters").getAsInt() >= 70));
-            suggestions.put("spawn-limits.water-ambient", new ConfigSuggestion("", "\"Decrease this in [bukkit.yml](https://bukkit.gamepedia.com/Bukkit.yml). Recommended: 2.",
+            suggestions.put("spawn-limits.water-ambient", new ConfigSuggestion("", "\"Decrease this in [bukkit.yml](https://bukkit.gamepedia.com/Bukkit.yml). Recommended: 5.",
                     configs -> configs.getAsJsonObject("bukkit").getAsJsonObject("spawn-limits").get("water-ambient").getAsInt() >= 20));
             suggestions.put("spawn-limits.ambient", new ConfigSuggestion("", "Decrease this in [bukkit.yml](https://bukkit.gamepedia.com/Bukkit.yml). Recommended: 1.",
                     configs -> configs.getAsJsonObject("bukkit").getAsJsonObject("spawn-limits").get("ambient").getAsInt() >= 15));
-            suggestions.put("spawn-limits.animals", new ConfigSuggestion("", "Decrease this in [bukkit.yml](https://bukkit.gamepedia.com/Bukkit.yml). Recommended: 3.",
+            suggestions.put("spawn-limits.animals", new ConfigSuggestion("", "Decrease this in [bukkit.yml](https://bukkit.gamepedia.com/Bukkit.yml). Recommended: 5.",
                     configs -> configs.getAsJsonObject("bukkit").getAsJsonObject("spawn-limits").get("animals").getAsInt() >= 10));
-            suggestions.put("spawn-limits.water-animals", new ConfigSuggestion("", "Decrease this in [bukkit.yml](https://bukkit.gamepedia.com/Bukkit.yml). Recommended: 2.",
+            suggestions.put("spawn-limits.water-animals", new ConfigSuggestion("", "Decrease this in [bukkit.yml](https://bukkit.gamepedia.com/Bukkit.yml). Recommended: 5.",
                     configs -> configs.getAsJsonObject("bukkit").getAsJsonObject("spawn-limits").get("water-animals").getAsInt() >= 15));
             return suggestions;
         }));
@@ -193,7 +193,7 @@ public class TimingsSuggestions {
                     configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("grass-spread-tick-rate").getAsInt() == 1)));
             suggestions.put("despawn-ranges.soft", new ConfigSuggestion("", "Decrease this in [paper.yml](http://bit.ly/paperconf). Recommended: 28.",
                     configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("despawn-ranges").get("soft").getAsInt() >= 32)));
-            suggestions.put("despawn-ranges.hard", new ConfigSuggestion("", "Decrease this in [paper.yml](http://bit.ly/paperconf). Recommended: 48.",
+            suggestions.put("despawn-ranges.hard", new ConfigSuggestion("", "Decrease this in [paper.yml](http://bit.ly/paperconf). Recommended: 96.",
                     configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("despawn-ranges").get("hard").getAsInt() >= 128)));
             suggestions.put("hopper.disable-move-event", new ConfigSuggestion("", "Enable this in [paper.yml](http://bit.ly/paperconf).",
                     configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().getAsJsonObject("hopper").get("disable-move-event").getAsBoolean())));
