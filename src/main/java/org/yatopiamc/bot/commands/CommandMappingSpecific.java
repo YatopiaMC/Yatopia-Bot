@@ -104,13 +104,21 @@ public class CommandMappingSpecific extends Command {
           (baseType == BaseMappingType.SPIGOT ? bot.spigotParser : bot.yarnParser)
               .parseMapping(mappingType, version, mapping);
       if (mappings.isEmpty()) {
-        channel.sendMessage("No information found for: " + mapping).queue();
+        if (mapping.contains("@")) {
+          channel.sendMessage("No information found.").queue();
+        } else {
+          channel.sendMessage("No information found for: " + mapping).queue();
+        }
         return;
       }
       MappingPaginator paginator = new MappingPaginator(mappings);
       List<Mapping> paged = paginator.getPage(page);
       if (paged.isEmpty()) {
-        channel.sendMessage("Invalid page " + page).queue();
+        if (mapping.contains("@")) {
+          channel.sendMessage("Invalid page.").queue();
+        } else {
+          channel.sendMessage("Invalid page " + page).queue();
+        }
         return;
       }
       StringBuilder messageBuilder = new StringBuilder();
