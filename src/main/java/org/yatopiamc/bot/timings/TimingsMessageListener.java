@@ -203,6 +203,16 @@ public class TimingsMessageListener extends ListenerAdapter {
                 embedBuilder.addField("armor-stands-tick", "Disable this in [paper.yml](http://bit.ly/paperconf).", true);
         } catch (NullPointerException ignored) {
         }
+        plugins.entrySet().stream().filter(entry -> {
+            try {
+                final JsonElement authors = entry.getValue().getAsJsonObject().get("authors");
+                return authors.isJsonPrimitive() && authors.getAsJsonPrimitive().getAsString().contains("songoda") && !entry.getKey().equals("EpicHeads");
+            } catch (NullPointerException ignored) {
+                return false;
+            }
+        }).forEach(entry -> {
+            embedBuilder.addField(entry.getKey(), "This plugin was made by Songoda. Songoda resources are poorly developed and often cause problems. You should find an alternative.", true);
+        });
     }
 
     private void checkDataPacks(EmbedBuilder embedBuilder, JsonObject timingsMaster) {
@@ -227,7 +237,7 @@ public class TimingsMessageListener extends ListenerAdapter {
     private void checkCPU(EmbedBuilder embedBuilder, JsonObject system) {
         final int cpu = system.get("cpu").getAsInt();
         if(cpu < 4)
-            embedBuilder.addField("CPU Threads", String.format("You have only %d thread(s). Find a better host.", cpu), true);
+            embedBuilder.addField("CPU Threads", String.format("You have only %d thread(s). Get more cpu threads.", cpu), true);
     }
 
     private void checkJvmFlags(EmbedBuilder embedBuilder, JsonObject system) {
@@ -288,7 +298,7 @@ public class TimingsMessageListener extends ListenerAdapter {
     private void checkTimingCost(EmbedBuilder embedBuilder, JsonObject system) {
         final int timingcost = system.get("timingcost").getAsInt();
         if (timingcost > 300)
-            embedBuilder.addField("Timingcost is high", String.format("Your timingcost is %d. Your cpu is overloaded and/or slow. Find a better host.", timingcost), true);
+            embedBuilder.addField("Timingcost is high", String.format("Your timingcost is %d. Your cpu is overloaded and/or slow. Upgrade your cpu. ", timingcost), true);
     }
 
     private void checkMinecraftVersion(EmbedBuilder embedBuilder, JsonObject timingsMaster) {

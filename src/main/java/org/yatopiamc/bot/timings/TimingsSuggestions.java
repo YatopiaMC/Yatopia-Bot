@@ -40,7 +40,6 @@ public class TimingsSuggestions {
                     suggestions.put("WildStacker", new PluginSuggestion("", "Stacking mobs causes more lag."));
                     suggestions.put("UltimateStacker", new PluginSuggestion("", "Stacking mobs causes more lag."));
                     suggestions.put("FastAsyncWorldEdit", new PluginSuggestion("", "FAWE has been known to cause issues. Consider replacing FAWE with [Worldedit](https://enginehub.org/worldedit/#downloads)."));
-                    suggestions.put("CMI", new PluginSuggestion("", "CMI is a buggy plugin. Consider replacing CMI with [EssentialsX](https://essentialsx.net/downloads.html)."));
                     suggestions.put("IllegalStack", new PluginSuggestion("", "You probably don't need IllegalStack as Paper already fixes all dupe and crash bugs."));
                     suggestions.put("ExploitFixer", new PluginSuggestion("", "You probably don't need ExploitFixer as Paper already fixes all dupe and crash bugs."));
                     suggestions.put("EntityTrackerFixer", new PluginSuggestion("", "You don't need EntityTrackerFixer as Paper already has its features."));
