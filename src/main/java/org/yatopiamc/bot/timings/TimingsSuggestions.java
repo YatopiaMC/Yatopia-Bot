@@ -232,10 +232,6 @@ public class TimingsSuggestions {
                     configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("mobs").getAsJsonObject("villager").getAsJsonObject("spawn-iron-golem").get("radius").getAsInt() == 0)));
             suggestions.put("mobs.zombie.aggressive-towards-villager-when-lagging", new ConfigSuggestion("", "Disable this in [purpur.yml](http://bit.ly/purpurc).",
                     configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("mobs").getAsJsonObject("zombie").get("aggressive-towards-villager-when-lagging").getAsBoolean())));
-            suggestions.put("mobs.villager.lobotomize.enabled", new ConfigSuggestion("", "Enable this in [purpur.yml](http://bit.ly/purpurc).",
-                    configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().getAsJsonObject("mobs").getAsJsonObject("villager").getAsJsonObject("lobotomize").get("enabled").getAsBoolean())));
-            suggestions.put("gameplay-mechanics.entities-can-use-portals", new ConfigSuggestion("", "Disable this in [purpur.yml](http://bit.ly/purpurc) to prevent players from creating chunk anchors.",
-                    configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("gameplay-mechanics").get("entities-can-use-portals").getAsBoolean())));
             suggestions.put("gameplay-mechanics.player.teleport-if-outside-border", new ConfigSuggestion("", "Enable this in [purpur.yml](http://bit.ly/purpurc).",
                     configs -> configs.getAsJsonObject("purpur").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().getAsJsonObject("gameplay-mechanics").getAsJsonObject("player").get("teleport-if-outside-border").getAsBoolean())));
             return suggestions;
