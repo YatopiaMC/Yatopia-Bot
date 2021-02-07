@@ -314,9 +314,8 @@ public class TimingsMessageListener extends ListenerAdapter {
 
     private CompletableFuture<Message> inProgress(Message message) {
         CompletableFuture<Message> future = new CompletableFuture<>();
-        message.delete().queueAfter(2, TimeUnit.SECONDS);
         EmbedBuilder c = new EmbedBuilder().setTitle("Query in progress");
-        message.getAuthor().openPrivateChannel().flatMap((channel) -> channel.sendMessage(c.build())).onErrorFlatMap((error) -> message.getChannel().sendMessage(c.build())).queue(future::complete, future::completeExceptionally);
+        message.getAuthor().openPrivateChannel().flatMap((channel) -> channel.sendMessage(c.build())).onErrorFlatMap((error) -> message.reply(c.build())).queue(future::complete, future::completeExceptionally);
         return future;
     }
 }
