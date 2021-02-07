@@ -108,7 +108,7 @@ public class TimingsSuggestions {
                     configs -> configs.getAsJsonObject("bukkit").getAsJsonObject("ticks-per").get("monster-spawns").getAsInt() == 1));
             suggestions.put("spawn-limits.monsters", new ConfigSuggestion("", "Decrease this in [bukkit.yml](https://bukkit.gamepedia.com/Bukkit.yml). Recommended: 15.",
                     configs -> configs.getAsJsonObject("bukkit").getAsJsonObject("spawn-limits").get("monsters").getAsInt() >= 70));
-            suggestions.put("spawn-limits.water-ambient", new ConfigSuggestion("", "\"Decrease this in [bukkit.yml](https://bukkit.gamepedia.com/Bukkit.yml). Recommended: 5.",
+            suggestions.put("spawn-limits.water-ambient", new ConfigSuggestion("", "Decrease this in [bukkit.yml](https://bukkit.gamepedia.com/Bukkit.yml). Recommended: 5.",
                     configs -> configs.getAsJsonObject("bukkit").getAsJsonObject("spawn-limits").get("water-ambient").getAsInt() >= 20));
             suggestions.put("spawn-limits.ambient", new ConfigSuggestion("", "Decrease this in [bukkit.yml](https://bukkit.gamepedia.com/Bukkit.yml). Recommended: 1.",
                     configs -> configs.getAsJsonObject("bukkit").getAsJsonObject("spawn-limits").get("ambient").getAsInt() >= 15));
@@ -188,7 +188,7 @@ public class TimingsSuggestions {
                     configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> !entry.getValue().getAsJsonObject().getAsJsonObject("game-mechanics").get("disable-chest-cat-detection").getAsBoolean())));
             suggestions.put("container-update-tick-rate", new ConfigSuggestion("", "Increase this in [paper.yml](http://bit.ly/paperconf). Recommended: 3.",
                     configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("container-update-tick-rate").getAsInt() == 1)));
-            suggestions.put("grass-spread-tick-rate", new ConfigSuggestion("", "\"Increase this in [paper.yml](http://bit.ly/paperconf). Recommended: 4.",
+            suggestions.put("grass-spread-tick-rate", new ConfigSuggestion("", "Increase this in [paper.yml](http://bit.ly/paperconf). Recommended: 4.",
                     configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().get("grass-spread-tick-rate").getAsInt() == 1)));
             suggestions.put("despawn-ranges.soft", new ConfigSuggestion("", "Decrease this in [paper.yml](http://bit.ly/paperconf). Recommended: 28.",
                     configs -> configs.getAsJsonObject("paper").getAsJsonObject("world-settings").entrySet().stream().anyMatch(entry -> entry.getValue().getAsJsonObject().getAsJsonObject("despawn-ranges").get("soft").getAsInt() >= 32)));
