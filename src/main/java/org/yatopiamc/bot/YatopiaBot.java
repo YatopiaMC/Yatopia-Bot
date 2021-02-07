@@ -82,13 +82,13 @@ public class YatopiaBot {
 
   public void start() throws LoginException, InterruptedException, IOException {
     JDA jda =
-        JDABuilder.create(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS)
+        JDABuilder.create(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.DIRECT_MESSAGES)
             .setToken(token)
             .setGatewayPool(executor)
             .setCallbackPool(executor)
             .setRateLimitPool(executor)
             .setActivity(Activity.playing("Yatopia.jar"))
-            .disableCache(CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY)
+            .disableCache(CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY, CacheFlag.CLIENT_STATUS)
             .addEventListeners(timingsMessageListener)
             .addEventListeners(pasteMessageListener)
             .build()
@@ -105,6 +105,7 @@ public class YatopiaBot {
     settings.setEnablePrefixCommand(false);
     settings.setPrefixHandler(new ImmutablePrefixHandler("?"));
     settings.setEnableHelpCommand(true);
+    settings.setAllowDMSCommands(false);
     settings.setErrorEmbed(() -> EmbedUtil.defaultEmbed().setColor(Color.RED).setTitle("Error"));
     settings.setExecutorService(executor);
     settings.setSuccessEmbed(
