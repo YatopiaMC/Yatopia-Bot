@@ -44,9 +44,9 @@ public class TimingsSuggestions {
                     suggestions.put("ExploitFixer", new PluginSuggestion("", "You probably don't need ExploitFixer as Paper already fixes all dupe and crash bugs."));
                     suggestions.put("EntityTrackerFixer", new PluginSuggestion("", "You don't need EntityTrackerFixer as Paper already has its features."));
                     suggestions.put("Orebfuscator", new PluginSuggestion("", "You don't need Orebfuscator as [Paper](https://gist.github.com/stonar96/ba18568bd91e5afd590e8038d14e245e) already has its features."));
-                    suggestions.put("GroupManager", new PluginSuggestion("", "GroupManager is an outdated permission plugin. Consider replacing it with [LuckPerms](https://www.spigotmc.org/resources/luckperms.28140/)."));
-                    suggestions.put("PermissionsEx", new PluginSuggestion("", "PermissionsEx is an outdated permission plugin. Consider replacing it with [LuckPerms](https://www.spigotmc.org/resources/luckperms.28140/)."));
-                    suggestions.put("bPermissions", new PluginSuggestion("", "bPermissions is an outdated permission plugin. Consider replacing it with [LuckPerms](https://www.spigotmc.org/resources/luckperms.28140/)."));
+                    suggestions.put("GroupManager", new PluginSuggestion("", "GroupManager is an outdated permission plugin. Consider replacing it with [LuckPerms](https://luckperms.net/download)."));
+                    suggestions.put("PermissionsEx", new PluginSuggestion("", "PermissionsEx is an outdated permission plugin. Consider replacing it with [LuckPerms](https://luckperms.net/download)."));
+                    suggestions.put("bPermissions", new PluginSuggestion("", "bPermissions is an outdated permission plugin. Consider replacing it with [LuckPerms](https://luckperms.net/download)."));
                     suggestions.put("PhantomSMP", new PluginSuggestion("", "You probably don't need PhantomSMP as Paper already has its features. See phantoms-only-attack-insomniacs in paper.yml"));
                     suggestions.put("EpicHeads", new PluginSuggestion("", "This plugin was made by Songoda. Songoda resources are poorly developed and often cause problems. You should find an alternative such as [HeadsPlus](https://spigotmc.org/resources/headsplus-»-1-8-1-16-4.40265/) or [HeadDatabase](https://www.spigotmc.org/resources/head-database.14280/)."));
                     return suggestions;

@@ -27,11 +27,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -245,7 +242,17 @@ public class TimingsMessageListener extends ListenerAdapter {
         if (jvmFlags.contains("-XX:+UseZGC")) {
             final String jvmVersion = system.get("jvmversion").getAsString();
             if (Integer.parseInt(jvmVersion.split("\\.")[0]) < 14)
-                embedBuilder.addField("Java version & ZGC", "If you are going to use ZGC, you should also use Java 14+.", true);
+                embedBuilder.addField("Java version & ZGC", "If you are going to use ZGC, you should also use Java 15 or later.", true);
+            if (jvmFlags.contains("-Xmx")) {
+                int maxMem = 0;
+                String xmxString = jvmFlags.substring(jvmFlags.indexOf("-Xmx"));
+                xmxString = xmxString.substring(4,xmxString.indexOf(" ")).toLowerCase(Locale.ENGLISH).replace("g", "000").replace("m", "");
+                try {
+                    if (Integer.parseInt(xmxString) < 10000) {
+                        embedBuilder.addField("Low Memory", "ZGC is only good with a lot of memory. It's recommended to only use it with 10GB+ of memory.", true);
+                    }
+                } catch (NumberFormatException ignored) { }
+            }
         } else if (jvmFlags.contains("-Daikars.new.flags=true")) {
             if (!jvmFlags.contains("XX:G1MixedGCCountTarget=4"))
                 embedBuilder.addField("Outdated JVM Flags", "Add `-XX:G1MixedGCCountTarget=4` to flags.", true);
