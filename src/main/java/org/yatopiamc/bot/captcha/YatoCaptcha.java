@@ -7,6 +7,9 @@ import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yatopiamc.bot.timings.TimingsMessageListener;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -18,8 +21,11 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class YatoCaptcha extends ListenerAdapter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimingsMessageListener.class);
     private static final HashMap<User, String> codes = new HashMap<>();
     private static TextChannel helpChannel = null;
 
@@ -27,7 +33,7 @@ public class YatoCaptcha extends ListenerAdapter {
         InputStream is = null;
         try {
             final BufferedImage image = ImageIO.read(Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResourceAsStream("yatopialogo.png")));
-            final String code = String.valueOf(new Random().nextInt(1000000 - 50000) + 50000);
+            final String code = String.valueOf(ThreadLocalRandom.current().nextInt(1000000 - 50000) + 50000);
 
             Graphics2D g = (Graphics2D) image.getGraphics();
             g.setFont(Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResourceAsStream("LoveBaby.ttf"))).deriveFont(40f));
@@ -42,7 +48,8 @@ public class YatoCaptcha extends ListenerAdapter {
             is = new ByteArrayInputStream(os.toByteArray());
             os.close();
             codes.put(u, code);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            LOGGER.error(String.valueOf(e));
         }
         return is;
     }
