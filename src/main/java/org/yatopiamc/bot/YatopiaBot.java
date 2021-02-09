@@ -27,7 +27,7 @@ import org.yatopiamc.bot.mappings.MappingParser;
 import org.yatopiamc.bot.mappings.spigot.SpigotMappingHandler;
 import org.yatopiamc.bot.mappings.yarn.YarnMappingHandler;
 import org.yatopiamc.bot.paste.PasteMessageListener;
-import org.yatopiamc.bot.server.YatoCaptcha;
+import org.yatopiamc.bot.captcha.YatoCaptcha;
 import org.yatopiamc.bot.timings.TimingsMessageListener;
 import org.yatopiamc.bot.util.NetworkUtils;
 
