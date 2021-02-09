@@ -38,9 +38,9 @@ public class YatoCaptcha extends ListenerAdapter {
             Graphics2D g = (Graphics2D) image.getGraphics();
             g.setFont(Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResourceAsStream("LoveBaby.ttf"))).deriveFont(40f));
             AffineTransform at = new AffineTransform();
-            at.setToRotation(Math.random());
+            at.setToRotation(ThreadLocalRandom.current().nextInt(0, 360));
             g.setTransform(at);
-            g.drawString(code, 50, 50);
+            g.drawString(code, ThreadLocalRandom.current().nextInt(25,75), ThreadLocalRandom.current().nextInt(25,75));
             g.dispose();
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();
