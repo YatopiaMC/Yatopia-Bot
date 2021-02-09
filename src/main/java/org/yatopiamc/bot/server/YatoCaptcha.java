@@ -53,11 +53,14 @@ public class YatoCaptcha extends ListenerAdapter {
 
     public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {
         if(codes.containsKey(e.getAuthor())) {
-            Member m = general.getGuild().getMember(e.getAuthor());
-            if(m == null) {
+            Member m;
+            try {
+                m = general.getGuild().getMember(e.getAuthor());
+            } catch (Exception e1) {
                 e.getAuthor().openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("You are no longer on the Yatopia's server, so i can't give you the role to make you able to talk.")).queue();
                 return;
             }
+
             if(codes.get(e.getAuthor()).equals(e.getMessage().getContentRaw())) {
                 general.getGuild().addRoleToMember(m, general.getGuild().getRoleById("member role id here" /*ROLE TO GIVE*/)).queue();
                 codes.remove(e.getAuthor());
