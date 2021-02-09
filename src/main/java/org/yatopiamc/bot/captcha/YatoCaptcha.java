@@ -80,7 +80,6 @@ public class YatoCaptcha extends ListenerAdapter {
     }
 
     public void onReady(ReadyEvent e) {
-        LOGGER.warn("test");
-                helpChannel = e.getJDA().getTextChannelById("808517832408301598");
+        helpChannel = e.getJDA().getTextChannelById("808517832408301598");
     }
 }
