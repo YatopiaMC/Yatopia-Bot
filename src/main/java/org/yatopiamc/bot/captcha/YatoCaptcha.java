@@ -40,7 +40,7 @@ public class YatoCaptcha extends ListenerAdapter {
             AffineTransform at = new AffineTransform();
             at.setToRotation(ThreadLocalRandom.current().nextInt(0, 360));
             g.setTransform(at);
-            g.drawString(code, ThreadLocalRandom.current().nextInt(25,75), ThreadLocalRandom.current().nextInt(25,75));
+            g.drawString(code, ThreadLocalRandom.current().nextInt(40,60), ThreadLocalRandom.current().nextInt(40,60));
             g.dispose();
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();
