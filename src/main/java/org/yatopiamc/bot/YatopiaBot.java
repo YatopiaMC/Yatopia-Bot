@@ -19,6 +19,7 @@ import org.yatopiamc.bot.mappings.MappingParser;
 import org.yatopiamc.bot.mappings.spigot.SpigotMappingHandler;
 import org.yatopiamc.bot.mappings.yarn.YarnMappingHandler;
 import org.yatopiamc.bot.paste.PasteMessageListener;
+import org.yatopiamc.bot.server.YatoCaptcha;
 import org.yatopiamc.bot.timings.TimingsMessageListener;
 import org.yatopiamc.bot.util.NetworkUtils;
 
@@ -61,7 +62,7 @@ public class YatopiaBot {
         Executors.newScheduledThreadPool(
             12,
             new ThreadFactory() {
-              private AtomicInteger count = new AtomicInteger(0);
+              private final AtomicInteger count = new AtomicInteger(0);
 
               @Override
               public Thread newThread(@NotNull Runnable r) {
@@ -74,7 +75,7 @@ public class YatopiaBot {
 
   public void start() throws LoginException, InterruptedException, IOException {
     JDA jda =
-        JDABuilder.create(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.DIRECT_MESSAGES)
+        JDABuilder.create(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MEMBERS)
             .setToken(token)
             .setGatewayPool(executor)
             .setCallbackPool(executor)
@@ -84,6 +85,7 @@ public class YatopiaBot {
             .addEventListeners(timingsMessageListener)
             .addEventListeners(pasteMessageListener)
             .addEventListeners(new RandomSentences())
+            .addEventListeners(new YatoCaptcha())
             .build()
             .awaitReady();
 
@@ -140,7 +142,8 @@ public class YatopiaBot {
         new CommandShutdown("252049584598024192"),
         new CommandShitspiller(),
         new CommandVroomVroom(),
-        new CommandTias());
+        new CommandTias(),
+        new CommandGiveRole());
 
     executor.scheduleAtFixedRate(
         new Runnable() {

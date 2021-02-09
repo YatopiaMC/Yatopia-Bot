@@ -13,7 +13,7 @@ public class RandomSentences extends ListenerAdapter {
     public void onGuildMessageReceived(GuildMessageReceivedEvent e) {
         String m = e.getMessage().getContentRaw();
 
-        if(m.contains("Zeus"))
+        if(m.contains("Zeus") && !e.getAuthor().isBot())
             e.getChannel().sendMessage(sentences.get(new Random().nextInt(sentences.size()))).queue();
     }
 }
