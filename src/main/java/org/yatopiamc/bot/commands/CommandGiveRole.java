@@ -10,6 +10,9 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.MessageChannel;
 import net.dv8tion.jda.api.entities.Role;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.yatopiamc.bot.timings.TimingsMessageListener;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -19,6 +22,8 @@ import java.util.concurrent.TimeUnit;
 @CommandDescription("Give role to every member")
 @CommandUsage("giverole")
 public class CommandGiveRole extends Command {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimingsMessageListener.class);
 
     @Override
     public boolean execute(@NotNull CommandExecutionContext context, @NotNull CommandArguments args) {
@@ -38,9 +43,9 @@ public class CommandGiveRole extends Command {
                     try {
                         assert role != null;
                         context.getGuild().addRoleToMember(m, role).queue();
-                        System.out.println("Added role to " + m.getUser().getAsTag());
+                        LOGGER.info("Added role to " + m.getUser().getAsTag());
                     } catch (Exception e) {
-                        System.out.println("Failed to add role to " + m.getUser().getAsTag() + ".\nI might lack the permissions to do so.");
+                        LOGGER.warn("Failed to add role to " + m.getUser().getAsTag() + ".\nI might lack the permissions to do so.");
                     }
                 }
                 channel.sendMessage("Finished adding role to all users.").queue();

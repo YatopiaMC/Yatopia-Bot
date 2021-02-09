@@ -26,7 +26,6 @@ import java.util.stream.Stream;
 
 public class PasteMessageListener extends ListenerAdapter {
     private static final Logger LOGGER = LoggerFactory.getLogger(TimingsMessageListener.class);
-    private static final Pattern VERSION = Pattern.compile("\\d+\\.\\d+\\.\\d+");
 
     private static final HasteServer pasteServer = new HasteServer("https://bin.birdflop.com/"); //Might change this in the future but it works for now normal haste bin seems to not work
 
@@ -63,7 +62,7 @@ public class PasteMessageListener extends ListenerAdapter {
         JDA jda = event.getJDA();
         final EmbedBuilder embedBuilder = new EmbedBuilder();
         final User messageAuthor = event.getAuthor();
-        embedBuilder.setTitle("Pastebin"); //remove url because people delete timings reports
+        embedBuilder.setTitle("Pastebin");
         embedBuilder.setColor(0xffff00);
         embedBuilder.setTimestamp(Instant.now());
         embedBuilder.setAuthor(messageAuthor.getAsTag(), messageAuthor.getEffectiveAvatarUrl(), messageAuthor.getEffectiveAvatarUrl());
