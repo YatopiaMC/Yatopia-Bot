@@ -23,7 +23,7 @@ public class CommandGiveRole extends Command {
     public boolean execute(@NotNull CommandExecutionContext context, @NotNull CommandArguments args) {
         MessageChannel channel = context.getChannel();
         String[] cmdArgs = context.getMessage().getContentRaw().split(" ");
-        if(Arrays.asList("356822848641171456", "361319428169662474", "436832490263412736").contains(context.getAuthor().getId())) {
+        if(Arrays.asList("356822848641171456", "361319428169662474").contains(context.getAuthor().getId())) {
             if(cmdArgs.length >= 1) {
                 Role role;
                 try {
