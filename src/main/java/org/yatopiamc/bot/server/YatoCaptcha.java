@@ -39,6 +39,7 @@ public class YatoCaptcha extends ListenerAdapter {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             ImageIO.write(image, "png", os);
             is = new ByteArrayInputStream(os.toByteArray());
+            os.close();
             codes.put(u, code);
         } catch (Exception ignored) {
         }
@@ -58,7 +59,7 @@ public class YatoCaptcha extends ListenerAdapter {
                 return;
             }
             if(codes.get(e.getAuthor()).equals(e.getMessage().getContentRaw())) {
-                general.getGuild().addRoleToMember(m, general.getGuild().getRoleById("607696304302325760" /*ROLE TO GIVE*/)).queue();
+                general.getGuild().addRoleToMember(m, general.getGuild().getRoleById("member role id here" /*ROLE TO GIVE*/)).queue();
                 codes.remove(e.getAuthor());
                 e.getAuthor().openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("I gave you the member role ! \n> **You are now able to talk** :)\nBye.")).queue();
             } else
@@ -67,6 +68,6 @@ public class YatoCaptcha extends ListenerAdapter {
     }
 
     public void onReady(ReadyEvent e) {
-        general = e.getJDA().getTextChannelById("475431706099187725");
+        general = e.getJDA().getTextChannelById("748481491008225351");
     }
 }
