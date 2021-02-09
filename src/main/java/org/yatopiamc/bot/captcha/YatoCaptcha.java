@@ -61,21 +61,18 @@ public class YatoCaptcha extends ListenerAdapter {
 
     public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {
         if(codes.containsKey(e.getAuthor())) {
-            Member m;
             try {
-                m = helpChannel.getGuild().getMember(e.getAuthor());
+                helpChannel.getGuild().retrieveMember(e.getAuthor()).queue(member -> {
+                    if(codes.get(e.getAuthor()).equals(e.getMessage().getContentRaw())) {
+                        helpChannel.getGuild().addRoleToMember(member, Objects.requireNonNull(helpChannel.getGuild().getRoleById("808517734577078302" /*ROLE TO GIVE*/))).queue();
+                        codes.remove(e.getAuthor());
+                        e.getAuthor().openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("Verification successful.\nWelcome to YatopiaMC.\nHave a nice day!")).queue();
+                    } else
+                        e.getAuthor().openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("Verification unsuccessful.\nPlease try again.").addFile(generateImage(e.getAuthor()), "yatocatpcha.png").onErrorFlatMap(throwable -> helpChannel.sendMessage("Hello " + e.getAuthor().getAsMention() + ", I need you to open your DMs so that I can send you a captcha."))).queue();
+                });
             } catch (Exception e1) {
                 e.getAuthor().openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("You left YatopiaMC, so there is no need to verify you.")).queue();
-                return;
             }
-
-            if(codes.get(e.getAuthor()).equals(e.getMessage().getContentRaw())) {
-                assert m != null;
-                helpChannel.getGuild().addRoleToMember(m, Objects.requireNonNull(helpChannel.getGuild().getRoleById("808517734577078302" /*ROLE TO GIVE*/))).queue();
-                codes.remove(e.getAuthor());
-                e.getAuthor().openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("Verification successful.\nWelcome to YatopiaMC.\nHave a nice day!")).queue();
-            } else
-                e.getAuthor().openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("Verification unsuccessful.\nPlease try again.").addFile(generateImage(e.getAuthor()), "yatocatpcha.png").onErrorFlatMap(throwable -> helpChannel.sendMessage("Hello " + e.getAuthor().getAsMention() + ", I need you to open your DMs so that I can send you a captcha."))).queue();
         }
     }
 
