@@ -13,8 +13,16 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yatopiamc.bot.commands.*;
-import org.yatopiamc.bot.fun.RandomSentences;
+import org.yatopiamc.bot.commands.CommandDownloadSpecific;
+import org.yatopiamc.bot.commands.CommandJDKSpecific;
+import org.yatopiamc.bot.commands.CommandMappingSpecific;
+import org.yatopiamc.bot.commands.CommandPing;
+import org.yatopiamc.bot.commands.CommandShitspiller;
+import org.yatopiamc.bot.commands.CommandTias;
+import org.yatopiamc.bot.commands.CommandUpstream;
+import org.yatopiamc.bot.commands.CommandVanilla;
+import org.yatopiamc.bot.commands.CommandVroomVroom;
+import org.yatopiamc.bot.commands.CommandYatopiaSpecific;
 import org.yatopiamc.bot.mappings.MappingParser;
 import org.yatopiamc.bot.mappings.spigot.SpigotMappingHandler;
 import org.yatopiamc.bot.mappings.yarn.YarnMappingHandler;
@@ -84,7 +92,6 @@ public class YatopiaBot {
             .disableCache(CacheFlag.VOICE_STATE, CacheFlag.ACTIVITY, CacheFlag.CLIENT_STATUS)
             .addEventListeners(timingsMessageListener)
             .addEventListeners(pasteMessageListener)
-            .addEventListeners(new RandomSentences())
             .addEventListeners(new YatoCaptcha())
             .build()
             .awaitReady();
