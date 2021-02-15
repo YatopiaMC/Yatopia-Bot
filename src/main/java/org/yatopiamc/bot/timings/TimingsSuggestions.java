@@ -48,7 +48,6 @@ public class TimingsSuggestions {
                     suggestions.put("PermissionsEx", new PluginSuggestion("", "PermissionsEx is an outdated permission plugin. Consider replacing it with [LuckPerms](https://luckperms.net/download)."));
                     suggestions.put("bPermissions", new PluginSuggestion("", "bPermissions is an outdated permission plugin. Consider replacing it with [LuckPerms](https://luckperms.net/download)."));
                     suggestions.put("PhantomSMP", new PluginSuggestion("", "You probably don't need PhantomSMP as Paper already has its features. See phantoms-only-attack-insomniacs in paper.yml"));
-                    suggestions.put("EpicHeads", new PluginSuggestion("", "This plugin was made by Songoda. Songoda resources are poorly developed and often cause problems. You should find an alternative such as [HeadsPlus](https://spigotmc.org/resources/headsplus-»-1-8-1-16-4.40265/) or [HeadDatabase](https://www.spigotmc.org/resources/head-database.14280/)."));
                     return suggestions;
                 }
         ));

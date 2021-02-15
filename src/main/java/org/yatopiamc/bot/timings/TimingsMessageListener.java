@@ -200,16 +200,6 @@ public class TimingsMessageListener extends ListenerAdapter {
                 embedBuilder.addField("armor-stands-tick", "Disable this in [paper.yml](http://bit.ly/paperconf).", true);
         } catch (NullPointerException ignored) {
         }
-        plugins.entrySet().stream().filter(entry -> {
-            try {
-                final JsonElement authors = entry.getValue().getAsJsonObject().get("authors");
-                return authors.isJsonPrimitive() && authors.getAsJsonPrimitive().getAsString().contains("songoda") && !entry.getKey().equals("EpicHeads");
-            } catch (NullPointerException ignored) {
-                return false;
-            }
-        }).forEach(entry -> {
-            embedBuilder.addField(entry.getKey(), "This plugin was made by Songoda. Songoda resources are poorly developed and often cause problems. You should find an alternative.", true);
-        });
     }
 
     private void checkDataPacks(EmbedBuilder embedBuilder, JsonObject timingsMaster) {
