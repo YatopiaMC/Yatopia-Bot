@@ -1,11 +1,11 @@
 package org.yatopiamc.bot.captcha;
 
-import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.ReadyEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberJoinEvent;
 import net.dv8tion.jda.api.events.message.priv.PrivateMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class YatoCaptcha extends ListenerAdapter {
@@ -38,9 +37,9 @@ public class YatoCaptcha extends ListenerAdapter {
             Graphics2D g = (Graphics2D) image.getGraphics();
             g.setFont(Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(ClassLoader.getSystemClassLoader().getResourceAsStream("LoveBaby.ttf"))).deriveFont(40f));
             AffineTransform at = new AffineTransform();
-            at.setToRotation(ThreadLocalRandom.current().nextInt(0, 360));
+            at.setToRotation(Math.random());
             g.setTransform(at);
-            g.drawString(code, 50, 50);
+            g.drawString(code, 130, 130);
             g.dispose();
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -56,7 +55,20 @@ public class YatoCaptcha extends ListenerAdapter {
 
     public void onGuildMemberJoin(GuildMemberJoinEvent e) {
         if(e.getGuild().getId().equals("743126646617407649" /*GUILD ID*/))
-            e.getUser().openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("Hello, please send me the code on this image so I can verify you are not a robot.").addFile(generateImage(e.getUser()), "yatocatpcha.png").onErrorFlatMap(throwable -> helpChannel.sendMessage("Hello " + e.getMember().getAsMention() + ", I need you to open your DMs so that I can send you a captcha."))).queue();
+            sendCaptcha(e.getUser());
+    }
+
+    private static void sendCaptcha(User u) {
+        u.openPrivateChannel().flatMap(privateChannel -> privateChannel.sendMessage("Hello, please send me the code on this image so I can verify you are not a robot.").addFile(generateImage(u), "yatocatpcha.png").onErrorFlatMap(throwable -> helpChannel.sendMessage("Hello " + u.getAsMention() + ", I need that you open your DMs so that I can send you a captcha.\n When you did it, add a reaction to this message and I'll send you a captcha verification."))).queue();
+    }
+
+    public void onMessageReactionAdd(MessageReactionAddEvent e) {
+        e.getChannel().retrieveMessageById(e.getMessageId()).queue(message -> {
+            if(message.getAuthor().getId().equals("806584703687065632") && message.getContentRaw().contains("I need that you open your DMs") && message.getMentionedMembers().contains(e.getMember())) {
+                sendCaptcha(Objects.requireNonNull(e.getUser()));
+                message.delete().queue();
+            }
+        });
     }
 
     public void onPrivateMessageReceived(PrivateMessageReceivedEvent e) {

@@ -74,7 +74,7 @@ public class YatopiaBot {
 
   public void start() throws LoginException, InterruptedException, IOException {
     JDA jda =
-        JDABuilder.create(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MEMBERS)
+        JDABuilder.create(GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_EMOJIS, GatewayIntent.DIRECT_MESSAGES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_MESSAGE_REACTIONS)
             .setToken(token)
             .setGatewayPool(executor)
             .setCallbackPool(executor)
