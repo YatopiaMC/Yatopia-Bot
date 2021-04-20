@@ -37,7 +37,7 @@ public final class SpigotMappingParser {
                 MappingType.CLASS,
                 values[0],
                 null,
-                values[1],
+                mcVer == "1.16.5" ? values[1] : "net/minecraft/server/" + values[1],
                 mcVer,
                 null,
                 null));
