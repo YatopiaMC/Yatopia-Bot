@@ -62,14 +62,13 @@ public final class SpigotMappingParser {
         }
         String description = values.length == 4 ? values[2] : null;
         Mapping parent = null;
-        /*
+        String mappingsPathPrefix = mcVer == "1.16.5" ? "" : "net/minecraft/server/";
         for (Mapping mapping : classMappings) {
-          if (mapping.getName().equalsIgnoreCase("net/minecraft/server/" + owner)) {
+          if (mapping.getName().equalsIgnoreCase(mappingsPathPrefix + owner)) {
             parent = mapping;
             break;
           }
         }
-        */
 
         ret.add(
             new Mapping(
