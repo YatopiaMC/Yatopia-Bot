@@ -37,7 +37,7 @@ public final class SpigotMappingParser {
                 MappingType.CLASS,
                 values[0],
                 null,
-                "net/minecraft/server/" + values[1],
+                values[1],
                 mcVer,
                 null,
                 null));
@@ -62,12 +62,14 @@ public final class SpigotMappingParser {
         }
         String description = values.length == 4 ? values[2] : null;
         Mapping parent = null;
+        /*
         for (Mapping mapping : classMappings) {
           if (mapping.getName().equalsIgnoreCase("net/minecraft/server/" + owner)) {
             parent = mapping;
             break;
           }
         }
+        */
 
         ret.add(
             new Mapping(
