@@ -18,7 +18,7 @@ public class CommandVroomVroom extends Command {
     context
         .getChannel()
         .sendMessage(
-            "<:faster1:753671545670336558> <:faster2:753671545796427826> <:faster3:753671545615810671> achieved with <:yatopia:745656023871782993> made by <:tr7zw:753678069688172694> , <:duplex:801473415588216843> , and <:ishland:799701573970034719>")
+            "<:faster1:753671545670336558> <:faster2:753671545796427826> <:faster3:753671545615810671> achieved with <:yatopia:745656023871782993> made by <:tr7zw:753678069688172694> , <:duplex:801473415588216843> , <:ishland:799701573970034719> , and <:jerry:834123977478635520>")
         .queue();
     return true;
   }

@@ -133,14 +133,10 @@ public class YatopiaBot {
         new CommandJDKSpecific(),
         new CommandDownloadSpecific(),
         new CommandYatopiaSpecific(),
-        new CommandVanilla(),
-        new CommandUpstream(),
         new CommandMappingSpecific(this),
         new CommandPing(),
         new CommandShutdown("252049584598024192"),
-        new CommandShitspiller(),
         new CommandVroomVroom(),
-        new CommandTias(),
         new CommandGiveRole());
 
     executor.scheduleAtFixedRate(
