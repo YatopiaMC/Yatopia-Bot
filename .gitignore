@@ -140,3 +140,4 @@ build/**
 
 config.json
 *.jar
+prefixes.json
