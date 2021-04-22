@@ -137,7 +137,8 @@ public class YatopiaBot {
         new CommandPing(),
         new CommandShutdown("252049584598024192"),
         new CommandVroomVroom(),
-        new CommandGiveRole());
+        new CommandGiveRole(),
+        new CommandCaptchaTest());
 
     executor.scheduleAtFixedRate(
         new Runnable() {
