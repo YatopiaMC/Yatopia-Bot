@@ -137,3 +137,7 @@ data/
 
 .gradle/**
 build/**
+
+config.json
+*.jar
+prefixes.json

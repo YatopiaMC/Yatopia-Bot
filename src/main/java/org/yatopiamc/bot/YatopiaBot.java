@@ -1,7 +1,6 @@
 package org.yatopiamc.bot;
 
 import com.mrivanplays.jdcf.CommandManager;
-import com.mrivanplays.jdcf.builtin.CommandShutdown;
 import com.mrivanplays.jdcf.settings.CommandSettings;
 import com.mrivanplays.jdcf.settings.prefix.ImmutablePrefixHandler;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -19,6 +18,7 @@ import org.yatopiamc.bot.mappings.spigot.SpigotMappingHandler;
 import org.yatopiamc.bot.mappings.yarn.YarnMappingHandler;
 import org.yatopiamc.bot.paste.PasteMessageListener;
 import org.yatopiamc.bot.captcha.YatoCaptcha;
+import org.yatopiamc.bot.captcha.YatoCaptchaTest;
 import org.yatopiamc.bot.timings.TimingsMessageListener;
 import org.yatopiamc.bot.util.NetworkUtils;
 
@@ -37,6 +37,9 @@ public class YatopiaBot {
   public static final Logger LOGGER = LoggerFactory.getLogger(YatopiaBot.class);
   private final TimingsMessageListener timingsMessageListener = new TimingsMessageListener();
   private final PasteMessageListener pasteMessageListener = new PasteMessageListener();
+  public final String botAdminRoleID = "834851929133678655"; // for YatopiaMC
+  // public final String botAdminRoleID = "834858365129195530"; // for test server
+
 
   public static void main(String[] args) throws LoginException, InterruptedException, IOException {
     ConfigInitializer config = new ConfigInitializer();
@@ -84,6 +87,7 @@ public class YatopiaBot {
             .addEventListeners(timingsMessageListener)
             .addEventListeners(pasteMessageListener)
             .addEventListeners(new YatoCaptcha())
+            .addEventListeners(new YatoCaptchaTest())
             .build()
             .awaitReady();
 
@@ -135,9 +139,10 @@ public class YatopiaBot {
         new CommandYatopiaSpecific(),
         new CommandMappingSpecific(this),
         new CommandPing(),
-        new CommandShutdown("356822848641171456"),
+        new CommandShutdown(botAdminRoleID),
         new CommandVroomVroom(),
-        new CommandGiveRole());
+        new CommandGiveRole(),
+        new CommandCaptchaTest());
 
     executor.scheduleAtFixedRate(
         new Runnable() {
