@@ -135,7 +135,7 @@ public class YatopiaBot {
         new CommandYatopiaSpecific(),
         new CommandMappingSpecific(this),
         new CommandPing(),
-        new CommandShutdown("252049584598024192"),
+        new CommandShutdown("356822848641171456"),
         new CommandVroomVroom(),
         new CommandGiveRole(),
         new CommandCaptchaTest());
