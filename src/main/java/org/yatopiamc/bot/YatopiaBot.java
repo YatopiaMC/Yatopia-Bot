@@ -19,6 +19,7 @@ import org.yatopiamc.bot.mappings.spigot.SpigotMappingHandler;
 import org.yatopiamc.bot.mappings.yarn.YarnMappingHandler;
 import org.yatopiamc.bot.paste.PasteMessageListener;
 import org.yatopiamc.bot.captcha.YatoCaptcha;
+import org.yatopiamc.bot.captcha.YatoCaptchaTest;
 import org.yatopiamc.bot.timings.TimingsMessageListener;
 import org.yatopiamc.bot.util.NetworkUtils;
 
@@ -84,6 +85,7 @@ public class YatopiaBot {
             .addEventListeners(timingsMessageListener)
             .addEventListeners(pasteMessageListener)
             .addEventListeners(new YatoCaptcha())
+            .addEventListeners(new YatoCaptchaTest())
             .build()
             .awaitReady();
 
