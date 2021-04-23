@@ -18,20 +18,24 @@ repositories {
         url = uri("https://jcenter.bintray.com/")
     }
 
+    maven {
+      url = uri("https://m2.dv8tion.net/releases")
+    }
+
     mavenCentral()
 }
 
 dependencies {
-    implementation("net.dv8tion:JDA:4.2.0_227")
+    implementation("net.dv8tion:JDA:4.2.1_260")
     implementation("com.mrivanplays:JDCF:1.0.6-SNAPSHOT")
-    implementation("com.github.ben-manes.caffeine:caffeine:2.8.5")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.0.1")
     implementation("org.apache.commons:commons-text:1.9")
     implementation("org.slf4j:slf4j-simple:1.7.25")
-    implementation("org.apache.httpcomponents.client5:httpclient5:5.0.3")
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.1-beta1")
     implementation("com.google.code.gson:gson:2.8.6")
-    implementation("com.google.guava:guava:30.1-jre")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.5.2")
-    testImplementation("org.junit.platform:junit-platform-runner:1.5.2")
+    implementation("com.google.guava:guava:30.1.1-jre")
+    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.0-M1")
+    testImplementation("org.junit.platform:junit-platform-runner:1.8.0-M1")
     implementation("com.mrivanplays:BinClient:1.0.1-SNAPSHOT")
 }
 
