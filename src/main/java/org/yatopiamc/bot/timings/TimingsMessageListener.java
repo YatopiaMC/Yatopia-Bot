@@ -231,8 +231,8 @@ public class TimingsMessageListener extends ListenerAdapter {
         final String jvmFlags = system.get("flags").getAsString();
         if (jvmFlags.contains("-XX:+UseZGC")) {
             final String jvmVersion = system.get("jvmversion").getAsString();
-            if (Integer.parseInt(jvmVersion.split("\\.")[0]) < 14)
-                embedBuilder.addField("Java version & ZGC", "If you are going to use ZGC, you should also use Java 15 or later.", true);
+            if (Integer.parseInt(jvmVersion.split("\\.")[0]) < 16)
+                embedBuilder.addField("Java version & ZGC", "If you are going to use ZGC, you should also use Java 16 or later.", true);
             if (jvmFlags.contains("-Xmx")) {
                 int maxMem = 0;
                 String xmxString = jvmFlags.substring(jvmFlags.indexOf("-Xmx"));
@@ -288,8 +288,8 @@ public class TimingsMessageListener extends ListenerAdapter {
 
     private void checkJvmVersion(EmbedBuilder embedBuilder, JsonObject system) {
         final String jvmVersion = system.get("jvmversion").getAsString();
-        if (jvmVersion.startsWith("1.8.") || jvmVersion.startsWith("9.") || jvmVersion.startsWith("10."))
-            embedBuilder.addField("Java version", String.format("You are using Java %s. Update to [Java 11](https://adoptopenjdk.net/installation.html).", jvmVersion), true);
+        if (jvmVersion.startsWith("1.8.") || jvmVersion.startsWith("9.") || jvmVersion.startsWith("10.") || jvmVersion.startsWith("11.") || jvmVersion.startsWith("12.") || jvmVersion.startsWith("13.") || jvmVersion.startsWith("14.") || jvmVersion.startsWith("15."))
+            embedBuilder.addField("Java version", String.format("You are using Java %s. Update to [Java 16](https://adoptopenjdk.net/installation.html).", jvmVersion), true);
     }
 
     private void checkTimingCost(EmbedBuilder embedBuilder, JsonObject system) {
