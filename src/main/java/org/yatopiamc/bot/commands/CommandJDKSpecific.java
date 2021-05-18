@@ -22,7 +22,7 @@ public class CommandJDKSpecific extends Command {
     switch (alias) {
       case "jdk":
         String descriptionJdk =
-            "Our advice on JDK is to use the latest LTS (Long Term Support) version, currently JDK 11";
+            "Our advice on JDK is to use the latest version, currently JDK 16";
         channel
             .sendMessage(
                 EmbedUtil.withAuthor(context.getAuthor()).setDescription(descriptionJdk).build())
